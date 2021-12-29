@@ -2,6 +2,7 @@ MUJOCO_LOG.TXT
 alignment_taskset*
 cached_videos/
 target_demo*
+logs/temp/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
