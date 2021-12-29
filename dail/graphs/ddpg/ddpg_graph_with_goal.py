@@ -282,6 +282,9 @@ def ddpg_graph_with_goal(env, ph, params):
                                       trans_agent_next_state[:, 2*EXP_NJOINTS:]],
                                       axis=1)
 
+    with tf.variable_scope('time_multiplier', reuse=tf.AUTO_REUSE):
+        graph[d_]['time_multiplier'] = tf.get_variable(name='time_multiplier', initializer=1.3,
+                                                       trainable=True, constraint=lambda z: tf.clip_by_value(z, 0.1, 10))
 
     # Map learner next state to expert space
     with tf.variable_scope('actor', reuse=True):
@@ -289,8 +292,8 @@ def ddpg_graph_with_goal(env, ph, params):
                                               params=params[d_]['statemap'], scope=d_+'/statemap',
                                               scale=params['train']['scale_state'],
                                               scale_fn=scale_state, scale_params=env[d_]['env'])
-
-
+        mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier']*(mapped_agent_next_state - graph[d_]['mapped_agent_state'])
+        #mapped_agent_next_state = 1.0*mapped_agent_next_state
         mapped_next_state = tf.concat([mapped_agent_next_state[:, :2*EXP_NJOINTS],
                                        next_goal_state,
                                        mapped_agent_next_state[:, 2*EXP_NJOINTS:]],
@@ -357,6 +360,7 @@ def get_ddpg_with_goal_vars(env):
         else:
             graph_vars[d_]['actor_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/statemap')
             graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='actor/'+d_+'/actionmap')
+            graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='time_multiplier/time_multiplier')
 
             # For inverse statemap
             graph_vars[d_]['auto_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/invmap')
