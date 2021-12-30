@@ -516,11 +516,15 @@ class DDPGAgent():
             save_gama_reward = tf.Summary.Value(tag='Best GAMA Reward', simple_value=best_gama_reward)
             gama_loss = tf.Summary.Value(tag='GAMA Loss', simple_value=np.mean(readouts['learner']['gama_loss']))
             gen_loss = tf.Summary.Value(tag='Generator Loss', simple_value=np.mean(readouts['learner']['gen_loss']))
+            bc_loss = tf.Summary.Value(tag='Action Loss', simple_value=np.mean(readouts['learner']['bc_loss']))
+            disc_loss = tf.Summary.Value(tag='Discriminator Loss', simple_value=np.mean(readouts['learner']['disc_loss']))
             time_multiplier = tf.Summary.Value(tag='Time Multiplier', simple_value=self.graph['learner']['time_multiplier'].eval(session=self.sess))
             self.writer.add_summary(tf.Summary(value=[save_reward]), step)
             self.writer.add_summary(tf.Summary(value=[save_gama_reward]), step)
             self.writer.add_summary(tf.Summary(value=[gama_loss]), step)
             self.writer.add_summary(tf.Summary(value=[gen_loss]), step)
+            self.writer.add_summary(tf.Summary(value=[bc_loss]), step)
+            self.writer.add_summary(tf.Summary(value=[disc_loss]), step)
             self.writer.add_summary(tf.Summary(value=[time_multiplier]), step)
 
             # Reset readouts

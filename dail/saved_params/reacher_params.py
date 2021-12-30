@@ -67,7 +67,7 @@ def generate_params(env):
 
         modellr = 1e-3
         disclr = 1e-3
-        setlr = 1e-3
+        # setlr = 1e-3
 
         autolr = 1e-4
         statelr = 1e-3
@@ -91,29 +91,29 @@ def generate_params(env):
                                     'regularizer': [None]*3,
                                     'reg_scale': [reg_scale]*3},
 
-                         'statemap': {'lr': statelr,
-                                      'lr_decay': 1.,
-                                      'num_hidden': [h]*2 + [env['learner']['state_dim']],
-                                      'activation': [act]*2 + [None],
-                                      'init': [init]*3,
-                                      'regularizer': [None]*3,
-                                      'reg_scale': [reg_scale]*3},
-
-                         'actionmap': {'lr': actionlr,
-                                       'lr_decay': 1.,
-                                       'num_hidden': [h]*2 + [env['expert']['action_dim']],
-                                       'activation': [act]*2 + [None],
-                                       'init': [init]*3,
-                                       'regularizer': [None]*3,
-                                       'reg_scale': [reg_scale]*3},
-
-                         'setsizemap': {'lr': setlr,
-                                        'lr_decay': 1.,
-                                        'num_hidden': [h]*2 + [train_params['max_set_size']],
-                                        'activation': [act]*2 + [None],
-                                        'init': [init]*3,
-                                        'regularizer': [None]*3,
-                                        'reg_scale': [l1_reg_scale]*3},
+                         # 'statemap': {'lr': statelr,
+                         #              'lr_decay': 1.,
+                         #              'num_hidden': [h]*2 + [env['learner']['state_dim']],
+                         #              'activation': [act]*2 + [None],
+                         #              'init': [init]*3,
+                         #              'regularizer': [None]*3,
+                         #              'reg_scale': [reg_scale]*3},
+                         #
+                         # 'actionmap': {'lr': actionlr,
+                         #               'lr_decay': 1.,
+                         #               'num_hidden': [h]*2 + [env['expert']['action_dim']],
+                         #               'activation': [act]*2 + [None],
+                         #               'init': [init]*3,
+                         #               'regularizer': [None]*3,
+                         #               'reg_scale': [reg_scale]*3},
+                         #
+                         # 'setsizemap': {'lr': setlr,
+                         #                'lr_decay': 1.,
+                         #                'num_hidden': [h]*2 + [train_params['max_set_size']],
+                         #                'activation': [act]*2 + [None],
+                         #                'init': [init]*3,
+                         #                'regularizer': [None]*3,
+                         #                'reg_scale': [l1_reg_scale]*3},
 
                          'model': {'lr': modellr,
                                    'lr_decay': lr_decay,
@@ -121,18 +121,18 @@ def generate_params(env):
                                    'activation': [act]*3 + [None],
                                    'init': [init]*4,
                                    'regularizer': [None]*4,
-                                   'reg_scale': [reg_scale]*4},
+                                   'reg_scale': [reg_scale]*4}
 
-                         'discriminator': {'lr': disclr,
-                                           'lr_decay': lr_decay,
-                                           'num_hidden': [h]*2 + [1],
-                                           'activation': [act]*2 + [None],
-                                           'init': [init]*3,
-                                           'regularizer': [None]*3,
-                                           'reg_scale': [reg_scale]*3},
-
-                         'auto': {'lr': autolr,
-                                  'lr_decay': 1.}
+                         # 'discriminator': {'lr': disclr,
+                         #                   'lr_decay': lr_decay,
+                         #                   'num_hidden': [h]*2 + [1],
+                         #                   'activation': [act]*2 + [None],
+                         #                   'init': [init]*3,
+                         #                   'regularizer': [None]*3,
+                         #                   'reg_scale': [reg_scale]*3},
+                         #
+                         # 'auto': {'lr': autolr,
+                         #          'lr_decay': 1.}
                         }
 
         learner_params = {'use_bc': True,
@@ -176,13 +176,13 @@ def generate_params(env):
                                         'regularizer': ['l2']*3,
                                         'reg_scale': [reg_scale]*3},
 
-                          'setsizemap': {'lr': setlr,
-                                         'lr_decay': 1.,
-                                         'num_hidden': [h]*2 + [train_params['max_set_size']],
-                                         'activation': [act]*2 + [None],
-                                         'init': [init]*3,
-                                         'regularizer': [None]*3,
-                                         'reg_scale': [l1_reg_scale]*3},
+                          # 'setsizemap': {'lr': setlr,
+                          #                'lr_decay': 1.,
+                          #                'num_hidden': [h]*2 + [train_params['max_set_size']],
+                          #                'activation': [act]*2 + [None],
+                          #                'init': [init]*3,
+                          #                'regularizer': [None]*3,
+                          #                'reg_scale': [l1_reg_scale]*3},
 
                           'model': {'lr': modellr,
                                     'lr_decay': lr_decay,
@@ -198,10 +198,11 @@ def generate_params(env):
                                             'activation': [act]*2 + [None],
                                             'init': [init]*3,
                                             'regularizer': [None]*3,
-                                            'reg_scale': [reg_scale]*3},
+                                            'reg_scale': [reg_scale]*3,
+                                            'beta1': 0.9}
 
-                          'auto': {'lr': autolr,
-                                   'lr_decay': 1.}
+                          # 'auto': {'lr': autolr,
+                          #          'lr_decay': 1.}
                         }
 
 

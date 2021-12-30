@@ -283,8 +283,8 @@ def ddpg_graph_with_goal(env, ph, params):
                                       axis=1)
 
     with tf.variable_scope('time_multiplier', reuse=tf.AUTO_REUSE):
-        graph[d_]['time_multiplier'] = tf.get_variable(name='time_multiplier', initializer=1.3,
-                                                       trainable=True, constraint=lambda z: tf.clip_by_value(z, 0.1, 10))
+        graph[d_]['time_multiplier'] = tf.math.exp(
+            0.2*tf.get_variable(name='log', initializer=0.0))
 
     # Map learner next state to expert space
     with tf.variable_scope('actor', reuse=True):
@@ -360,7 +360,7 @@ def get_ddpg_with_goal_vars(env):
         else:
             graph_vars[d_]['actor_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/statemap')
             graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='actor/'+d_+'/actionmap')
-            graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='time_multiplier/time_multiplier')
+            graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='time_multiplier')
 
             # For inverse statemap
             graph_vars[d_]['auto_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/invmap')
@@ -500,7 +500,8 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             #============ Expert DDPG Train Operation / GAMA Train Operation ============
             lr_actor = params[d_]['actor']['lr']
             lr_decay_actor = params[d_]['actor']['lr_decay']
-            actor_op = tf.train.AdamOptimizer(lr_actor*lr_decay_actor**episodes)
+            beta1 = params[d_]['discriminator']['beta1'] if d_=='learner' else 0.9
+            actor_op = tf.train.AdamOptimizer(lr_actor*lr_decay_actor**episodes, beta1=beta1)
             actor_grads_and_vars = actor_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['actor_grad_vars'])
             actor_train_op = actor_op.apply_gradients(grads_and_vars=actor_grads_and_vars)
 
@@ -548,10 +549,13 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             if d_ == 'learner':
                 lr_disc = params[d_]['discriminator']['lr']
                 lr_decay_disc = params[d_]['discriminator']['lr_decay']
+                beta1 = params[d_]['discriminator']['beta1']
 
                 # Add a entropy regularizer to the discriminator
                 logits = tf.concat([graph[d_]['fake_prob'], graph[d_]['real_prob']], 0)
                 entropy_loss = -tf.reduce_mean(logit_bernoulli_entropy(logits))
+                # sigmoid_real_prob = tf.nn.sigmoid(graph[d_]['real_prob'])
+                # entropy_loss = -tf.reduce_mean(sigmoid_real_prob*(1-sigmoid_real_prob))/0.0005
 
                 fake_loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=graph[d_]['fake_prob'], labels=tf.zeros_like(graph[d_]['fake_prob']))
                 fake_loss = tf.reduce_mean(fake_loss)
@@ -559,7 +563,7 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                 real_loss = tf.reduce_mean(real_loss)
                 disc_loss = fake_loss + real_loss + 0.0005*entropy_loss
 
-                disc_op = tf.train.AdamOptimizer(lr_disc*lr_decay_disc**episodes)
+                disc_op = tf.train.AdamOptimizer(lr_disc*lr_decay_disc**episodes, beta1=beta1)
                 disc_grads_and_vars = disc_op.compute_gradients(loss=disc_loss*ph[d_]['train_disc'], var_list=var_dict[d_]['disc_grad_vars'])
                 disc_train_op = disc_op.apply_gradients(grads_and_vars=disc_grads_and_vars)
 
