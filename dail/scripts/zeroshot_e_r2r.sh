@@ -7,13 +7,13 @@
 SESS_NAME="eval_e_r2r"
 DOC="empty"
 #VENV_DIR="../.virtualenv/cdil/bin/activate"
-VENV_DIR="~/Desktop/Research/2.DAIL/cdil/venv/bin/activate"
+VENV_DIR="venv/bin/activate"
 tmux kill-session -t $SESS_NAME
-tmux new-session -d -s $SESS_NAME
+tmux new-session -d -s $SESS_NAME -n 1
 
-BEGIN=0
+BEGIN=7
 END=9
-TOTAL_GPU=4
+TOTAL_GPU=1
 
 for ((i=BEGIN; i<=END; i++)); do
 gpu_num=$((i % TOTAL_GPU))
