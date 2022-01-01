@@ -751,6 +751,27 @@ class DDPGAgent():
 
 
 
+    def rollout_random(self):
+        # Graph variable initialization
+        self.sess.run(tf.global_variables_initializer())
+
+        # Visualize loaded expert policy
+        vid_name = self.args.doc + '_{}'.format(self.load_expert_dir[-1]) if self.args.doc else self.load_expert_dir[-6:]
+        render_random(self.env,
+                      'expert',
+                      num_rollout=50,
+                      save_video=False,
+                      save_dir=vid_name)
+
+        # Close environments
+        self.sess.close()
+        self.writer.close()
+        for d_ in self.env.keys():
+            self.env[d_]['env'].close()
+        return
+
+
+
     def render_statemap(self, loop_vars, save_video=True, num_rollout=20, save_dir='learner_policy'):
 
 

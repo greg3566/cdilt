@@ -166,6 +166,10 @@ if __name__ == '__main__':
         print("Save={}".format(args.save_expert_dir))
         agent.bc(from_ckpt=True)
 
+    elif args.agent_type == 'rollout_random':
+        print("Rollout random")
+        agent.rollout_random()
+
     else:
         print("Unrecognized experiment type")
         exit(1)

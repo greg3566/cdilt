@@ -497,7 +497,7 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
 
                 #========================== state-action Entangle Loss ========================
                 entangle_loss = graph[d_]['entangle_loss']
-                actor_loss += 1e-2*entangle_loss
+                actor_loss += 1e-3*entangle_loss
 
             else:
                 gen_loss = tf.constant(0)

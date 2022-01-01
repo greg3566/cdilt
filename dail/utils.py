@@ -100,6 +100,49 @@ def render_policy(sess, graph, ph, env, domain, num_rollout=20, save_video=True,
     return avg_reward
 
 
+def render_random(env, domain, num_rollout=20, save_video=True, save_dir='temp'):
+
+    frames = []
+    tot_reward = []
+
+    if save_video:
+        print("Saving video")
+    else:
+        print("Evaluating random performance")
+
+    for idx in range(num_rollout):
+        done = False
+        obs = env[domain]['env'].reset()
+        steps = 0
+        ep_reward = 0.
+
+        while not done:
+            if save_video:
+                frames.append(env[domain]['env'].render(mode='rgb_array'))
+
+            # action = env[domain]['env'].action_space.sample()
+            action_space = env[domain]['env'].action_space
+            action = action_space.low + (action_space.high - action_space.low)*np.random.rand(*action_space.shape)
+            obs, reward, done, info = env[domain]['env'].step(action)
+
+#            print(np.around(action, 4))
+
+            ep_reward += reward
+            steps += 1
+
+        tot_reward.append(ep_reward)
+
+    if save_video:
+        save_frames_as_video(frames, save_dir)
+
+
+    avg_reward = np.mean(tot_reward)
+    print("Steps: {}".format(steps))
+    print("Avg Reward: {}".format(avg_reward))
+
+    return avg_reward
+
+
 def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=True, vid_name='demonstrations'):
 
     frames = []
