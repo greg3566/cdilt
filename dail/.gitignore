@@ -3,6 +3,7 @@ alignment_taskset*
 cached_videos/
 target_demo*
 logs/temp/
+expert_data/taskset
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

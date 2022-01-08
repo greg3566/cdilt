@@ -282,9 +282,9 @@ def ddpg_graph_with_goal(env, ph, params):
                                       trans_agent_next_state[:, 2*EXP_NJOINTS:]],
                                       axis=1)
 
-    # with tf.variable_scope('time_multiplier', reuse=tf.AUTO_REUSE):
-    #     graph[d_]['time_multiplier'] = tf.math.exp(
-    #         1.*tf.get_variable(name='log', initializer=0.0))
+    with tf.variable_scope('time_multiplier', reuse=tf.AUTO_REUSE):
+        graph[d_]['time_multiplier'] = tf.math.exp(
+            1.*tf.get_variable(name='log', initializer=0.0))
 
     # Map learner next state to expert space
     with tf.variable_scope('actor', reuse=True):
@@ -292,7 +292,7 @@ def ddpg_graph_with_goal(env, ph, params):
                                               params=params[d_]['statemap'], scope=d_+'/statemap',
                                               scale=params['train']['scale_state'],
                                               scale_fn=scale_state, scale_params=env[d_]['env'])
-        # mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier']*(mapped_agent_next_state - graph[d_]['mapped_agent_state'])
+        mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier']*(mapped_agent_next_state - graph[d_]['mapped_agent_state'])
         #mapped_agent_next_state = 1.0*mapped_agent_next_state
         mapped_next_state = tf.concat([mapped_agent_next_state[:, :2*EXP_NJOINTS],
                                        next_goal_state,
@@ -361,7 +361,7 @@ def get_ddpg_with_goal_vars(env):
             graph_vars[d_]['actor_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/statemap')
             graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='actor/'+d_+'/actionmap')
             # graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='time_multiplier')
-            # graph_vars[d_]['time_multiplier_grad_vars'] = tf.get_collection(glob_vars, scope='time_multiplier')
+            graph_vars[d_]['time_multiplier_grad_vars'] = tf.get_collection(glob_vars, scope='time_multiplier')
 
             # For inverse statemap
             graph_vars[d_]['auto_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/invmap')
@@ -504,12 +504,12 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             actor_op = tf.train.AdamOptimizer(lr_actor*lr_decay_actor**episodes)
             actor_grads_and_vars = actor_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['actor_grad_vars'])
             actor_train_op = actor_op.apply_gradients(grads_and_vars=actor_grads_and_vars)
-            # if d_ == 'learner':
-            #     time_multiplier_op = tf.train.AdamOptimizer(20.*lr_actor*lr_decay_actor ** episodes, beta1=0.5)
-            #     time_multiplier_grads_and_vars = time_multiplier_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['time_multiplier_grad_vars'])
-            #     time_multiplier_train_op = time_multiplier_op.apply_gradients(grads_and_vars=time_multiplier_grads_and_vars)
-            # else:
-            #     time_multiplier_train_op = tf.constant(0)
+            if d_ == 'learner':
+                time_multiplier_op = tf.train.AdamOptimizer(20.*lr_actor*lr_decay_actor ** episodes, beta1=0.5)
+                time_multiplier_grads_and_vars = time_multiplier_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['time_multiplier_grad_vars'])
+                time_multiplier_train_op = time_multiplier_op.apply_gradients(grads_and_vars=time_multiplier_grads_and_vars)
+            else:
+                time_multiplier_train_op = tf.constant(0)
 
             #============= Behavioral cloning for target expert ===============
             if d_ == 'expert':
@@ -593,8 +593,8 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                                          'bc_loss': action_loss,
                                          'gen_loss': gen_loss,
                                          'disc_loss': disc_loss,
-                                         'temp_loss': temporal_loss}
-            # 'time_multiplier_train_op': time_multiplier_train_op}
+                                         'temp_loss': temporal_loss,
+                                         'time_multiplier_train_op': time_multiplier_train_op}
 
             # Aggregate model targets
             targets[d_]['train_model'] = {'model_train_op': model_train_op,
