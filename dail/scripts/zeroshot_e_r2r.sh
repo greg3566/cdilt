@@ -11,14 +11,14 @@ VENV_DIR="venv/bin/activate"
 tmux kill-session -t $SESS_NAME
 tmux new-session -d -s $SESS_NAME -n 1
 
-BEGIN=7
-END=9
+BEGIN=1
+END=5
 TOTAL_GPU=1
 
 for ((i=BEGIN; i<=END; i++)); do
 gpu_num=$((i % TOTAL_GPU))
 
-PYTHON_CMD="source ${VENV_DIR} && python train.py --algo ddpg --agent_type zeroshot --load_expert_dir ./target_expert/reacher3_corner/alldemo --load_learner_dir ./saved_alignments/embodiment/12goals/seed_${i} --edomain reacher3_corner --ldomain reacher2_corner --seed 100${i} --doc e_r2r"
+PYTHON_CMD="source ${VENV_DIR} && python train.py --algo ddpg --agent_type zeroshot --load_expert_dir ./target_expert/reacher3_corner/alldemo --load_learner_dir ./saved_alignments/embodiment/12goals/ta/seed_${i} --edomain reacher3_corner --ldomain reacher2_corner --seed 100${i} --doc e_r2r"
 
 if [ $i -ne $BEGIN ]
 then

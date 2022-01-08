@@ -124,6 +124,17 @@ def create_env(env_params, seed_dict):
         elif n_ == 'reacher6':
             curenv = gym.make('Reacher6DOF-v0')
             env_type = 'goal'
+
+        # Timestep
+        elif n_ == 'reacher2_slow':
+            curenv = gym.make('Reacher2DOFSlow-v0')
+            env_type = 'goal'
+        elif n_ == 'reacher2_slow_wall':
+            curenv = gym.make('Reacher2DOFSlowWall-v0')
+            env_type = 'goal'
+        elif n_ == 'reacher2_slow_corner':
+            curenv = gym.make('Reacher2DOFSlowCorner-v0')
+            env_type = 'goal'
         else:
             print("Unrecognized environment name: {}".format(n_))
             exit(1)

@@ -149,6 +149,7 @@ def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=Tr
     tot_reward = []
     total_obs = []
     total_acs = []
+    total_nacs = []
 
     if save_video:
         print("Saving video")
@@ -163,6 +164,7 @@ def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=Tr
         ep_reward = 0.
         ep_obs = []
         ep_acs = []
+        ep_nacs = []
 
         while not done:
             # Get next action
@@ -179,6 +181,7 @@ def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=Tr
             # Step in environment
             ## Add slight noise to the action space
             action += np.random.normal(0, 0.05)
+            ep_nacs.append(np.squeeze(action))
             obs, reward, done, info = env['expert']['env'].step(action)
 
             ep_reward += reward
@@ -187,6 +190,7 @@ def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=Tr
         tot_reward.append(ep_reward)
         total_obs.append(np.array(ep_obs))
         total_acs.append(np.array(ep_acs))
+        total_nacs.append(np.array(ep_nacs))
 
     # Print metrics
     print("Steps: {}".format(steps))
@@ -203,7 +207,9 @@ def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=Tr
     total_acs = np.array(total_acs, dtype='object')
     np.savez(save_dir,
              obs=total_obs,
-             acs=total_acs)
+             acs=total_acs,
+             nacs=total_nacs,
+             tot_reward=tot_reward)
 
 
 

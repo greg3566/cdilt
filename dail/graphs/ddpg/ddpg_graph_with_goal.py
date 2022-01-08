@@ -4,7 +4,6 @@ from pdb import set_trace
 import time
 
 from dail.model import *
-from .util import jacobian_loss
 
 
 #GOAL_SCALE = EXP_NJOINTS/LEA_NJOINTS
@@ -99,15 +98,13 @@ def ddpg_graph_with_goal(env, ph, params):
 
                 # Map expert action to learner action via actionmap
                 sa_action = tf.concat([graph[d_]['premap_action'], ph[d_]['state']], axis=1)
-                agent_state_premap_action = tf.concat([agent_state,
-                                                       graph[d_]['premap_action']], axis=1)
-                graph[d_]['action'] = feedforward(in_node=agent_state_premap_action,
+                graph[d_]['action'] = feedforward(in_node=graph[d_]['premap_action'],
                                                   is_training=ph[d_]['is_training'],
                                                   params=params[d_]['actionmap'],
                                                   scope='actor/'+d_+'/actionmap',
                                                   scale=True, scale_fn=scale_action,
                                                   scale_params=env[d_]['env'])
-                graph[d_]['entangle_loss'] = jacobian_loss(graph[d_]['action'],agent_state)
+
 
                 # Feed expert states through inverse map for GAMA-DA
                 expert_agent_state =tf.concat([ph[trans_d_]['state'][:, :2*EXP_NJOINTS],
@@ -126,9 +123,7 @@ def ddpg_graph_with_goal(env, ph, params):
                                                              mapped_lea_agent_state[:, 2*LEA_NJOINTS:]],
                                                              axis=1)
 
-                agent_state_trans_action = tf.concat([agent_state,
-                                                       ph[trans_d_]['action']], axis=1)
-                graph[trans_d_]['mapped_action'] = feedforward(agent_state_trans_action,
+                graph[trans_d_]['mapped_action'] = feedforward(in_node=ph[trans_d_]['action'],
                                                                is_training=ph[d_]['is_training'],
                                                                params=params[d_]['actionmap'],
                                                                scope='actor/'+d_+'/actionmap',
@@ -178,9 +173,7 @@ def ddpg_graph_with_goal(env, ph, params):
 
                 # Map expert action to learner action via actionmap
                 next_sa_action = tf.concat([premap_action, ph[d_]['next_state']], axis=1)
-                agent_state_premap_action = tf.concat([next_agent_state,
-                                                       premap_action], axis=1)
-                graph[d_]['slow_target_action'] = feedforward(in_node=agent_state_premap_action,
+                graph[d_]['slow_target_action'] = feedforward(in_node=premap_action,
                                                               is_training=ph[d_]['is_training'],
                                                               params=params[d_]['actionmap'],
                                                               scope='slow_target_actor/'+d_+'/actionmap',
@@ -289,9 +282,9 @@ def ddpg_graph_with_goal(env, ph, params):
                                       trans_agent_next_state[:, 2*EXP_NJOINTS:]],
                                       axis=1)
 
-    with tf.variable_scope('time_multiplier', reuse=tf.AUTO_REUSE):
-        graph[d_]['time_multiplier'] = tf.math.exp(
-            0.2*tf.get_variable(name='log', initializer=0.0))
+    # with tf.variable_scope('time_multiplier', reuse=tf.AUTO_REUSE):
+    #     graph[d_]['time_multiplier'] = tf.math.exp(
+    #         1.*tf.get_variable(name='log', initializer=0.0))
 
     # Map learner next state to expert space
     with tf.variable_scope('actor', reuse=True):
@@ -299,7 +292,7 @@ def ddpg_graph_with_goal(env, ph, params):
                                               params=params[d_]['statemap'], scope=d_+'/statemap',
                                               scale=params['train']['scale_state'],
                                               scale_fn=scale_state, scale_params=env[d_]['env'])
-        mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier']*(mapped_agent_next_state - graph[d_]['mapped_agent_state'])
+        # mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier']*(mapped_agent_next_state - graph[d_]['mapped_agent_state'])
         #mapped_agent_next_state = 1.0*mapped_agent_next_state
         mapped_next_state = tf.concat([mapped_agent_next_state[:, :2*EXP_NJOINTS],
                                        next_goal_state,
@@ -367,7 +360,8 @@ def get_ddpg_with_goal_vars(env):
         else:
             graph_vars[d_]['actor_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/statemap')
             graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='actor/'+d_+'/actionmap')
-            graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='time_multiplier')
+            # graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='time_multiplier')
+            # graph_vars[d_]['time_multiplier_grad_vars'] = tf.get_collection(glob_vars, scope='time_multiplier')
 
             # For inverse statemap
             graph_vars[d_]['auto_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/invmap')
@@ -495,10 +489,6 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                     gen_weight = 0.001 * ph[d_]['train_disc']
                     actor_loss = gen_weight*gen_loss + action_loss #+ 0*eyeloss_state
 
-                #========================== state-action Entangle Loss ========================
-                entangle_loss = graph[d_]['entangle_loss']
-                actor_loss += 1e-3*entangle_loss
-
             else:
                 gen_loss = tf.constant(0)
                 temporal_loss = tf.constant(0)
@@ -506,16 +496,20 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
 
                 # Behavioral cloning loss
                 bc_loss = tf.reduce_mean(tf.square(graph[d_]['action'] - ph[d_]['action_tv']))
-                entangle_loss = tf.constant(0)
+
 
             #============ Expert DDPG Train Operation / GAMA Train Operation ============
             lr_actor = params[d_]['actor']['lr']
             lr_decay_actor = params[d_]['actor']['lr_decay']
-            beta1 = params[d_]['discriminator']['beta1'] if d_=='learner' else 0.9
-            actor_op = tf.train.AdamOptimizer(lr_actor*lr_decay_actor**episodes, beta1=beta1)
+            actor_op = tf.train.AdamOptimizer(lr_actor*lr_decay_actor**episodes)
             actor_grads_and_vars = actor_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['actor_grad_vars'])
             actor_train_op = actor_op.apply_gradients(grads_and_vars=actor_grads_and_vars)
-
+            # if d_ == 'learner':
+            #     time_multiplier_op = tf.train.AdamOptimizer(20.*lr_actor*lr_decay_actor ** episodes, beta1=0.5)
+            #     time_multiplier_grads_and_vars = time_multiplier_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['time_multiplier_grad_vars'])
+            #     time_multiplier_train_op = time_multiplier_op.apply_gradients(grads_and_vars=time_multiplier_grads_and_vars)
+            # else:
+            #     time_multiplier_train_op = tf.constant(0)
 
             #============= Behavioral cloning for target expert ===============
             if d_ == 'expert':
@@ -560,21 +554,18 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             if d_ == 'learner':
                 lr_disc = params[d_]['discriminator']['lr']
                 lr_decay_disc = params[d_]['discriminator']['lr_decay']
-                beta1 = params[d_]['discriminator']['beta1']
 
                 # Add a entropy regularizer to the discriminator
                 logits = tf.concat([graph[d_]['fake_prob'], graph[d_]['real_prob']], 0)
                 entropy_loss = -tf.reduce_mean(logit_bernoulli_entropy(logits))
-                # sigmoid_real_prob = tf.nn.sigmoid(graph[d_]['real_prob'])
-                # entropy_loss = -tf.reduce_mean(sigmoid_real_prob*(1-sigmoid_real_prob))/0.0005
 
                 fake_loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=graph[d_]['fake_prob'], labels=tf.zeros_like(graph[d_]['fake_prob']))
                 fake_loss = tf.reduce_mean(fake_loss)
-                real_loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=graph[d_]['real_prob'], labels=tf.ones_like(graph[d_]['real_prob']))
+                real_loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=graph[d_]['real_prob'], labels=0.9*tf.ones_like(graph[d_]['real_prob']))
                 real_loss = tf.reduce_mean(real_loss)
                 disc_loss = fake_loss + real_loss + 0.0005*entropy_loss
 
-                disc_op = tf.train.AdamOptimizer(lr_disc*lr_decay_disc**episodes, beta1=beta1)
+                disc_op = tf.train.AdamOptimizer(lr_disc*lr_decay_disc**episodes)
                 disc_grads_and_vars = disc_op.compute_gradients(loss=disc_loss*ph[d_]['train_disc'], var_list=var_dict[d_]['disc_grad_vars'])
                 disc_train_op = disc_op.apply_gradients(grads_and_vars=disc_grads_and_vars)
 
@@ -602,8 +593,8 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                                          'bc_loss': action_loss,
                                          'gen_loss': gen_loss,
                                          'disc_loss': disc_loss,
-                                         'temp_loss': temporal_loss,
-                                         'entangle_loss': entangle_loss}
+                                         'temp_loss': temporal_loss}
+            # 'time_multiplier_train_op': time_multiplier_train_op}
 
             # Aggregate model targets
             targets[d_]['train_model'] = {'model_train_op': model_train_op,
@@ -638,3 +629,4 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
         targets['episode_inc_op'] = episode_inc_op
 
         return targets
+
