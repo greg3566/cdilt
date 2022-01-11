@@ -21,12 +21,16 @@ def ddpg_graph_with_goal(env, ph, params):
             graph : dictionary of computation graph nodes : dict
     '''
     graph = {}
-
+    print("NAME!!")
+    print(env['expert']['name'])
     # Set the number of joints parameter
     if 'reacher2' in env['expert']['name']:
         EXP_NJOINTS = 2
     elif 'reacher3' in env['expert']['name']:
         EXP_NJOINTS = 3
+    elif 'ant' in env['expert']['name']:
+        print("here!")
+        EXP_NJOINTS = 15
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
 
@@ -34,6 +38,9 @@ def ddpg_graph_with_goal(env, ph, params):
         LEA_NJOINTS = 2
     elif 'reacher3' in env['learner']['name']:
         LEA_NJOINTS = 3
+    elif 'ant' in env['expert']['name']:
+        print("here!")
+        LEA_NJOINTS = 15
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized learner env name {}'.format(env['learner']['name']))
 
@@ -414,6 +421,9 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             EXP_NJOINTS = 2
         elif 'reacher3' in env['expert']['name']:
             EXP_NJOINTS = 3
+        elif 'ant' in env['expert']['name']:
+            print("here!")
+            EXP_NJOINTS = 15    
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
 
@@ -421,6 +431,9 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             LEA_NJOINTS = 2
         elif 'reacher3' in env['learner']['name']:
             LEA_NJOINTS = 3
+        elif 'ant' in env['expert']['name']:
+            print("here!")
+            LEA_NJOINTS = 15
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized learner env name {}'.format(env['learner']['name']))
 

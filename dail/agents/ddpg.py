@@ -72,7 +72,6 @@ class DDPGAgent():
                                                      env=self.env,
                                                      algo='ddpg',
                                                      is_transfer=is_transfer)
-
             # Session and saver
             if self.gpu > -1:
                 gpu_options = tf.GPUOptions(allow_growth=True)
