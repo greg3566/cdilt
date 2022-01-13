@@ -170,6 +170,13 @@ if __name__ == '__main__':
         print("Rollout random")
         agent.rollout_random()
 
+    elif args.agent_type == 'create_alignment_taskset_from_both':
+        print("Creating Alignment Taskset with")
+        print("Expert={}".format(args.load_expert_dir))
+        print("Self={}".format(args.load_learner_dir))
+        learner_learner_env_params = {'expert': learner_domain, 'learner': learner_domain}
+        learner_learner_env = create_env(learner_learner_env_params, seed_dict)
+        agent.create_alignment_taskset(from_both=True, learner_learner_env=learner_learner_env)
     else:
         print("Unrecognized experiment type")
         exit(1)

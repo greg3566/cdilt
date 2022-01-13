@@ -72,7 +72,6 @@ class DDPGAgent():
                                                      env=self.env,
                                                      algo='ddpg',
                                                      is_transfer=is_transfer)
-
             # Session and saver
             if self.gpu > -1:
                 gpu_options = tf.GPUOptions(allow_growth=True)
@@ -518,7 +517,7 @@ class DDPGAgent():
             gen_loss = tf.Summary.Value(tag='Generator Loss', simple_value=np.mean(readouts['learner']['gen_loss']))
             bc_loss = tf.Summary.Value(tag='Action Loss', simple_value=np.mean(readouts['learner']['bc_loss']))
             disc_loss = tf.Summary.Value(tag='Discriminator Loss', simple_value=np.mean(readouts['learner']['disc_loss']))
-            entangle_loss = tf.Summary.Value(tag='Entangle Loss',simple_value=np.mean(readouts['learner']['entangle_loss']))
+            # entangle_loss = tf.Summary.Value(tag='Entangle Loss',simple_value=np.mean(readouts['learner']['entangle_loss']))
             time_multiplier = tf.Summary.Value(tag='Time Multiplier', simple_value=self.graph['learner']['time_multiplier'].eval(session=self.sess))
             self.writer.add_summary(tf.Summary(value=[save_reward]), step)
             self.writer.add_summary(tf.Summary(value=[save_gama_reward]), step)
@@ -526,7 +525,7 @@ class DDPGAgent():
             self.writer.add_summary(tf.Summary(value=[gen_loss]), step)
             self.writer.add_summary(tf.Summary(value=[bc_loss]), step)
             self.writer.add_summary(tf.Summary(value=[disc_loss]), step)
-            self.writer.add_summary(tf.Summary(value=[entangle_loss]), step)
+            # self.writer.add_summary(tf.Summary(value=[entangle_loss]), step)
             self.writer.add_summary(tf.Summary(value=[time_multiplier]), step)
 
             # Reset readouts

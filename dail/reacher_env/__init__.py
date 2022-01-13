@@ -31,3 +31,9 @@ register(id='WRITE_Reacher2DOF-v0', entry_point='dail.reacher_env.mujoco.write_r
 register(id='Reacher4DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_4dof:Reacher4DOFEnv', max_episode_steps=60)
 register(id='Reacher5DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_5dof:Reacher5DOFEnv', max_episode_steps=70)
 register(id='Reacher6DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_6dof:Reacher6DOFEnv', max_episode_steps=80)
+
+# Timestep altered
+register(id='Reacher2DOFSlow-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow:Reacher2DOFSlowEnv', max_episode_steps=150)
+register(id='Reacher2DOFSlowCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow_corner:Reacher2DOFSlowCornerEnv', max_episode_steps=150)
+register(id='Reacher2DOFSlowWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow_wall:Reacher2DOFSlowWallEnv', max_episode_steps=150)
+
