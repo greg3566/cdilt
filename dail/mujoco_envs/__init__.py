@@ -14,3 +14,15 @@ from gym.envs.mujoco.humanoidstandup import HumanoidStandupEnv
 from gym.envs.mujoco.pusher import PusherEnv
 from gym.envs.mujoco.thrower import ThrowerEnv
 from gym.envs.mujoco.striker import StrikerEnv
+from gym.envs.mujoco.ant import AntOriginalForwardOriginalPenaltyEnv
+from gym.envs.mujoco.ant import AntOriginalForwardUpdatedPenaltyEnv
+from gym.envs.mujoco.ant import AntOriginalDiagonalOriginalPenaltyEnv
+from gym.envs.mujoco.ant import AntOriginalDiagonalUpdatedPenaltyEnv
+from gym.envs.mujoco.ant_3legged import Ant3leggedForwardOriginalPenaltyEnv
+from gym.envs.mujoco.ant_3legged import Ant3leggedForwardUpdatedPenaltyEnv
+from gym.envs.mujoco.ant_3legged import Ant3leggedDiagonalOriginalPenaltyEnv
+from gym.envs.mujoco.ant_3legged import Ant3leggedDiagonalUpdatedPenaltyEnv
+from gym.envs.mujoco.ant_6legged import Ant6leggedForwardOriginalPenaltyEnv
+from gym.envs.mujoco.ant_6legged import Ant6leggedForwardUpdatedPenaltyEnv
+from gym.envs.mujoco.ant_6legged import Ant6leggedDiagonalOriginalPenaltyEnv
+from gym.envs.mujoco.ant_6legged import Ant6leggedDiagonalUpdatedPenaltyEnv
