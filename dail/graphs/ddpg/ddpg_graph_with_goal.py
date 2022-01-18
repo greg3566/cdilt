@@ -143,8 +143,8 @@ def ddpg_graph_with_goal(env, ph, params):
                                                              axis=1)
 
                 if USE_SAE:
-                    agent_state_trans_action = tf.concat([agent_state, ph[trans_d_]['action']], axis=1)
-                    graph[trans_d_]['mapped_action'] = feedforward(in_node=agent_state_trans_action,
+                    mapped_agent_state_trans_action = tf.concat([mapped_lea_agent_state, ph[trans_d_]['action']], axis=1)
+                    graph[trans_d_]['mapped_action'] = feedforward(in_node=mapped_agent_state_trans_action,
                                                                    is_training=ph[d_]['is_training'],
                                                                    params=params[d_]['actionmap'],
                                                                    scope='actor/' + d_ + '/actionmap',
