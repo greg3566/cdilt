@@ -4,10 +4,12 @@ from pdb import set_trace
 import time
 
 from dail.model import *
+from .util import jacobian_loss
 
 
 #GOAL_SCALE = EXP_NJOINTS/LEA_NJOINTS
 GOAL_SCALE = 1.
+USE_SAE = True
 
 
 def ddpg_graph_with_goal(env, ph, params):
@@ -105,12 +107,22 @@ def ddpg_graph_with_goal(env, ph, params):
 
                 # Map expert action to learner action via actionmap
                 sa_action = tf.concat([graph[d_]['premap_action'], ph[d_]['state']], axis=1)
-                graph[d_]['action'] = feedforward(in_node=graph[d_]['premap_action'],
-                                                  is_training=ph[d_]['is_training'],
-                                                  params=params[d_]['actionmap'],
-                                                  scope='actor/'+d_+'/actionmap',
-                                                  scale=True, scale_fn=scale_action,
-                                                  scale_params=env[d_]['env'])
+                if USE_SAE:
+                    agent_state_premap_action = tf.concat([agent_state, graph[d_]['premap_action']], axis=1)
+                    graph[d_]['action'] = feedforward(in_node=agent_state_premap_action,
+                                                      is_training=ph[d_]['is_training'],
+                                                      params=params[d_]['actionmap'],
+                                                      scope='actor/'+d_+'/actionmap',
+                                                      scale=True, scale_fn=scale_action,
+                                                      scale_params=env[d_]['env'])
+                    graph[d_]['entangle_loss'] = jacobian_loss(graph[d_]['action'], agent_state)
+                else:
+                    graph[d_]['action'] = feedforward(in_node=graph[d_]['premap_action'],
+                                                      is_training=ph[d_]['is_training'],
+                                                      params=params[d_]['actionmap'],
+                                                      scope='actor/'+d_+'/actionmap',
+                                                      scale=True, scale_fn=scale_action,
+                                                      scale_params=env[d_]['env'])
 
 
                 # Feed expert states through inverse map for GAMA-DA
@@ -130,12 +142,21 @@ def ddpg_graph_with_goal(env, ph, params):
                                                              mapped_lea_agent_state[:, 2*LEA_NJOINTS:]],
                                                              axis=1)
 
-                graph[trans_d_]['mapped_action'] = feedforward(in_node=ph[trans_d_]['action'],
-                                                               is_training=ph[d_]['is_training'],
-                                                               params=params[d_]['actionmap'],
-                                                               scope='actor/'+d_+'/actionmap',
-                                                               scale=True, scale_fn=scale_action,
-                                                               scale_params=env[d_]['env'])
+                if USE_SAE:
+                    agent_state_trans_action = tf.concat([agent_state, ph[trans_d_]['action']], axis=1)
+                    graph[trans_d_]['mapped_action'] = feedforward(in_node=agent_state_trans_action,
+                                                                   is_training=ph[d_]['is_training'],
+                                                                   params=params[d_]['actionmap'],
+                                                                   scope='actor/' + d_ + '/actionmap',
+                                                                   scale=True, scale_fn=scale_action,
+                                                                   scale_params=env[d_]['env'])
+                else:
+                    graph[trans_d_]['mapped_action'] = feedforward(in_node=ph[trans_d_]['action'],
+                                                                   is_training=ph[d_]['is_training'],
+                                                                   params=params[d_]['actionmap'],
+                                                                   scope='actor/'+d_+'/actionmap',
+                                                                   scale=True, scale_fn=scale_action,
+                                                                   scale_params=env[d_]['env'])
 
 
         # ========= SLOW TARGET ACTOR ==========
@@ -180,12 +201,22 @@ def ddpg_graph_with_goal(env, ph, params):
 
                 # Map expert action to learner action via actionmap
                 next_sa_action = tf.concat([premap_action, ph[d_]['next_state']], axis=1)
-                graph[d_]['slow_target_action'] = feedforward(in_node=premap_action,
-                                                              is_training=ph[d_]['is_training'],
-                                                              params=params[d_]['actionmap'],
-                                                              scope='slow_target_actor/'+d_+'/actionmap',
-                                                              scale=True, scale_fn=scale_action,
-                                                              scale_params=env[d_]['env'])
+                if USE_SAE:
+                    next_agent_state_premap_action = tf.concat([next_agent_state, premap_action], axis=1)
+                    graph[d_]['slow_target_action'] = feedforward(in_node=next_agent_state_premap_action,
+                                                                  is_training=ph[d_]['is_training'],
+                                                                  params=params[d_]['actionmap'],
+                                                                  scope='slow_target_actor/'+d_+'/actionmap',
+                                                                  scale=True, scale_fn=scale_action,
+                                                                  scale_params=env[d_]['env'])
+
+                else:
+                    graph[d_]['slow_target_action'] = feedforward(in_node=premap_action,
+                                                                  is_training=ph[d_]['is_training'],
+                                                                  params=params[d_]['actionmap'],
+                                                                  scope='slow_target_actor/'+d_+'/actionmap',
+                                                                  scale=True, scale_fn=scale_action,
+                                                                  scale_params=env[d_]['env'])
 
 
         # ========= DYNAMICS MODEL ==========
@@ -502,6 +533,13 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                     gen_weight = 0.001 * ph[d_]['train_disc']
                     actor_loss = gen_weight*gen_loss + action_loss #+ 0*eyeloss_state
 
+                #========================== state-action Entangle Loss ========================
+                if USE_SAE:
+                    entangle_loss = graph[d_]['entangle_loss']
+                    actor_loss = actor_loss + 1e-3 * entangle_loss
+                else:
+                    entangle_loss = tf.constant(0)
+
             else:
                 gen_loss = tf.constant(0)
                 temporal_loss = tf.constant(0)
@@ -509,6 +547,7 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
 
                 # Behavioral cloning loss
                 bc_loss = tf.reduce_mean(tf.square(graph[d_]['action'] - ph[d_]['action_tv']))
+                entangle_loss = tf.constant(0)
 
 
             #============ Expert DDPG Train Operation / GAMA Train Operation ============
@@ -607,7 +646,8 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                                          'gen_loss': gen_loss,
                                          'disc_loss': disc_loss,
                                          'temp_loss': temporal_loss,
-                                         'time_multiplier_train_op': time_multiplier_train_op}
+                                         'time_multiplier_train_op': time_multiplier_train_op,
+                                         'entangle_loss': entangle_loss}
 
             # Aggregate model targets
             targets[d_]['train_model'] = {'model_train_op': model_train_op,

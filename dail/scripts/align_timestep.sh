@@ -17,7 +17,7 @@ TOTAL_GPU=1
 for ((i=BEGIN; i<=END; i++)); do
 gpu_num=$((i % TOTAL_GPU))
 
-PYTHON_CMD="source ${VENV_DIR} && python train.py --algo ddpg --agent_type gama --load_dataset_dir ./expert_data/taskset/timestep.pickle --load_expert_dir ./alignment_expert/reacher2_wall/12goals --save_learner_dir ./saved_alignments/timestep/12goals/ts/seed_${i} --logdir ./logs/timestep/12goals/ts/seed_${i} --edomain reacher2_wall --ldomain reacher2_slow_wall --seed ${i} --gpu ${gpu_num}"
+PYTHON_CMD="source ${VENV_DIR} && python train.py --algo ddpg --agent_type gama --load_dataset_dir ./expert_data/taskset/timestep.pickle --load_expert_dir ./alignment_expert/reacher2_wall/12goals --save_learner_dir ./saved_alignments/timestep/12goals/tsa/seed_${i} --logdir ./logs/timestep/12goals/tsa/seed_${i} --edomain reacher2_wall --ldomain reacher2_slow_wall --seed ${i} --gpu ${gpu_num}"
 
 if [ $i -ne $BEGIN ]
 then
