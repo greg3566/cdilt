@@ -101,7 +101,12 @@ def ddpg_graph_with_goal(env, ph, params):
                                                          scope='actor/'+trans_d_,
                                                          scale=True, scale_fn=scale_action,
                                                          scale_params=env[trans_d_]['env'])
-
+                graph[d_]['invmap_action'] = feedforward(in_node=ph[d_]['action'],
+                                                         is_training=ph[d_]['is_training'],
+                                                         params=params[d_]['invactionmap'],
+                                                         scope='actor/'+d_+'/invactionmap',
+                                                         scale=True, scale_fn=scale_action,
+                                                         scale_params=env[trans_d_]['env'])
 
                 # Map expert action to learner action via actionmap
                 sa_action = tf.concat([graph[d_]['premap_action'], ph[d_]['state']], axis=1)
@@ -109,6 +114,12 @@ def ddpg_graph_with_goal(env, ph, params):
                                                   is_training=ph[d_]['is_training'],
                                                   params=params[d_]['actionmap'],
                                                   scope='actor/'+d_+'/actionmap',
+                                                  scale=True, scale_fn=scale_action,
+                                                  scale_params=env[d_]['env'])
+                graph[d_]['autoaction'] = feedforward(in_node=graph[d_]['invmap_action'],
+                                                  is_training=ph[d_]['is_training'],
+                                                  params=params[d_]['actionmap'],
+                                                  scope='actor/' + d_ + '/actionmap',
                                                   scale=True, scale_fn=scale_action,
                                                   scale_params=env[d_]['env'])
 
@@ -276,7 +287,8 @@ def ddpg_graph_with_goal(env, ph, params):
                                  is_training=ph[d_]['is_training'],
                                  params=params[d_]['model'],
                                  scope=d_)
-
+        agent_next_state = tf.concat([ph[d_]['next_state'][:, :2 * LEA_NJOINTS],
+                                 ph[d_]['next_state'][:, 2 * LEA_NJOINTS + 2:]], axis=1)
 
         # Next expert state
         trans_agent_next_state = feedforward(in_node=sa_trans,
@@ -295,7 +307,7 @@ def ddpg_graph_with_goal(env, ph, params):
 
     # Map learner next state to expert space
     with tf.variable_scope('actor', reuse=True):
-        mapped_agent_next_state = feedforward(in_node=next_state, is_training=ph[d_]['is_training'],
+        mapped_agent_next_state = feedforward(in_node=agent_next_state, is_training=ph[d_]['is_training'],
                                               params=params[d_]['statemap'], scope=d_+'/statemap',
                                               scale=params['train']['scale_state'],
                                               scale_fn=scale_state, scale_params=env[d_]['env'])
@@ -321,7 +333,7 @@ def ddpg_graph_with_goal(env, ph, params):
     with tf.variable_scope('discriminator', reuse=tf.AUTO_REUSE):
         # real and fake samples
         sas_fake = tf.concat([graph[d_]['mapped_state_end'],
-                              graph[d_]['premap_action'],
+                              graph[d_]['invmap_action'],
                               mapped_next_state], axis=1)
         sas_real = tf.concat([ph[trans_d_]['state'],
                               ph[trans_d_]['action'],
@@ -367,6 +379,7 @@ def get_ddpg_with_goal_vars(env):
         else:
             graph_vars[d_]['actor_grad_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/statemap')
             graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='actor/'+d_+'/actionmap')
+            graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='actor/' + d_ + '/invactionmap')
             # graph_vars[d_]['actor_grad_vars'] += tf.get_collection(glob_vars, scope='time_multiplier')
             graph_vars[d_]['time_multiplier_grad_vars'] = tf.get_collection(glob_vars, scope='time_multiplier')
 
@@ -376,10 +389,10 @@ def get_ddpg_with_goal_vars(env):
             # Variables for target network updates
             graph_vars[d_]['all_actor_vars'] = tf.get_collection(glob_vars, scope='actor/'+d_+'/statemap')
             graph_vars[d_]['all_actor_vars'] += tf.get_collection(glob_vars, scope='actor/'+d_+'/actionmap')
+            # graph_vars[d_]['all_actor_vars'] += tf.get_collection(glob_vars, scope='actor/' + d_ + '/invactionmap')
             graph_vars[d_]['all_slow_actor_vars'] = tf.get_collection(glob_vars, scope='slow_target_actor/'+d_+'/statemap')
             graph_vars[d_]['all_slow_actor_vars'] += tf.get_collection(glob_vars, scope='slow_target_actor/'+d_+'/actionmap')
-
-
+            # graph_vars[d_]['all_slow_actor_vars'] += tf.get_collection(glob_vars, scope='slow_target_actor/' + d_ + '/invactionmap')
 
         # Critic, statemap, autoencoder grad vars
         graph_vars[d_]['critic_grad_vars'] = tf.get_collection(glob_vars, scope='critic/'+d_)
@@ -466,7 +479,8 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
 
             # Actor loss (mean Q-values under current policy with regularization)
             if d_ == 'learner' and params[d_]['use_bc']:
-                action_loss = tf.reduce_mean(tf.square(graph[d_]['action'] - ph[d_]['raw_action']))
+                # action_loss = tf.reduce_mean(tf.square(graph[d_]['action'] - ph[d_]['raw_action']))
+                action_loss = tf.reduce_mean(tf.square(graph[d_]['autoaction'] - ph[d_]['action']))
             else:
                 action_loss = -1*tf.reduce_mean(graph[d_]['qvalue_actor'])
 

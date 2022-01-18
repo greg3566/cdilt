@@ -176,6 +176,14 @@ def generate_params(env):
                                         'regularizer': ['l2']*3,
                                         'reg_scale': [reg_scale]*3},
 
+                          'invactionmap': {'lr': actionlr,
+                                        'lr_decay': 1.,
+                                        'num_hidden': [200] * 2 + [env['expert']['action_dim']],
+                                        'activation': [act] * 2 + [None],
+                                        'init': [init] * 3,
+                                        'regularizer': ['l2'] * 3,
+                                        'reg_scale': [reg_scale] * 3},
+
                           # 'setsizemap': {'lr': setlr,
                           #                'lr_decay': 1.,
                           #                'num_hidden': [h]*2 + [train_params['max_set_size']],

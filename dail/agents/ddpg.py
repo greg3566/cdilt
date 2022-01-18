@@ -390,37 +390,37 @@ class DDPGAgent():
 
 
         #=========== Train the learner dynamics model ===========
-        step = 0
-        dynamics_loss = []
-#        for idx in range(10):
-        for idx in range(100000):
-
-            # grab N (s,a,r,s') tuples from replay memory
-            minibatch_l = self.replay_memory['learner'].sample_from_memory(batchsize=self.params['train']['batchsize'])
-
-            # update the critic and actor params using mean-square value error and deterministic policy gradient, respectively
-            feed_dict = {self.ph[d_]['state']: np.asarray([elem[0] for elem in minibatch_l]),
-                         self.ph[d_]['action']: np.asarray([elem[1] for elem in minibatch_l]),
-                         self.ph[d_]['next_state']: np.asarray([elem[3] for elem in minibatch_l]),
-                         self.ph[d_]['is_not_terminal']: np.asarray([elem[4] for elem in minibatch_l]),
-                         self.ph[d_]['is_training']: True,
-                         self.ph[d_]['train_disc']: 0}
-
-
-            # Train
-            fetches = self.sess.run(self.targets[d_]['train_model'], feed_dict=feed_dict)
-
-            # When done executing one episode in all domains
-            dynamics_loss.append(fetches['model_loss'])
-            step += 1
-
-
-            # Print metrics
-            if idx % 100 == 0:
-                print("Step {} | Learner dynamics loss: {:.2e}".format(idx, np.mean(dynamics_loss)), end="\r")
-                dynamics_loss = []
-
-            self.invoke_killer(render_option='learner_dynamics')
+#         step = 0
+#         dynamics_loss = []
+# #        for idx in range(10):
+#         for idx in range(100000):
+#
+#             # grab N (s,a,r,s') tuples from replay memory
+#             minibatch_l = self.replay_memory['learner'].sample_from_memory(batchsize=self.params['train']['batchsize'])
+#
+#             # update the critic and actor params using mean-square value error and deterministic policy gradient, respectively
+#             feed_dict = {self.ph[d_]['state']: np.asarray([elem[0] for elem in minibatch_l]),
+#                          self.ph[d_]['action']: np.asarray([elem[1] for elem in minibatch_l]),
+#                          self.ph[d_]['next_state']: np.asarray([elem[3] for elem in minibatch_l]),
+#                          self.ph[d_]['is_not_terminal']: np.asarray([elem[4] for elem in minibatch_l]),
+#                          self.ph[d_]['is_training']: True,
+#                          self.ph[d_]['train_disc']: 0}
+#
+#
+#             # Train
+#             fetches = self.sess.run(self.targets[d_]['train_model'], feed_dict=feed_dict)
+#
+#             # When done executing one episode in all domains
+#             dynamics_loss.append(fetches['model_loss'])
+#             step += 1
+#
+#
+#             # Print metrics
+#             if idx % 100 == 0:
+#                 print("Step {} | Learner dynamics loss: {:.2e}".format(idx, np.mean(dynamics_loss)), end="\r")
+#                 dynamics_loss = []
+#
+#             self.invoke_killer(render_option='learner_dynamics')
 
 
 #                self.render_dynamics({'epsilon': epsilon}, domain='learner', num_rollout=5, save_dir='learner_dynamics')
