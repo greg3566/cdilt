@@ -50,6 +50,7 @@ register(id='Antv1_9-v0', entry_point='dail.reacher_env.mujoco.ant:Antv1_9', max
 register(id='Antv1_10-v0', entry_point='dail.reacher_env.mujoco.ant:Antv1_10', max_episode_steps=1000)
 register(id='Antv1_11-v0', entry_point='dail.reacher_env.mujoco.ant:Antv1_11', max_episode_steps=1000)
 register(id='Antv1_12-v0', entry_point='dail.reacher_env.mujoco.ant:Antv1_12', max_episode_steps=1000)
+register(id='Antv1_multi_goal-v0', entry_point='dail.reacher_env.mujoco.ant:Antv1_multi_goal', max_episode_steps=1000)
 
 
 # Ant v2 (6legged)
