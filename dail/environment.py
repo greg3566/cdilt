@@ -135,6 +135,11 @@ def create_env(env_params, seed_dict):
         elif n_ == 'reacher2_slow_corner':
             curenv = gym.make('Reacher2DOFSlowCorner-v0')
             env_type = 'goal'
+
+        # Ant
+        elif n_ == 'ant':
+            curenv = gym.make('Antv1_multi_goal-v0')
+            env_type = 'goal'
         else:
             print("Unrecognized environment name: {}".format(n_))
             exit(1)

@@ -180,7 +180,7 @@ def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=Tr
 
             # Step in environment
             ## Add slight noise to the action space
-            action += np.random.normal(0, 0.05)
+            action += np.random.normal(0, 0.05, size=action.shape)
             ep_nacs.append(np.squeeze(action))
             obs, reward, done, info = env['expert']['env'].step(action)
 

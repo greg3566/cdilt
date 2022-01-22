@@ -26,7 +26,7 @@ if __name__ == '__main__':
     for i in range(obs.shape[0]):
         if steps>=num_transitions:
             continue
-        for j in range(obs.shape[1] - 1):
+        for j in range(obs[i].shape[0] - 1):
             done = False
             expert_transition = (
                 obs[i][j], nacs[i][j], 0., obs[i][j + 1],
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         if steps >= num_transitions:
             continue
         ep_reward = 0.
-        for j in range(obs.shape[1] - 1):
+        for j in range(obs[i].shape[0] - 1):
             done = False
             learner_transition = (
                 obs[i][j], nacs[i][j], 0., obs[i][j + 1],

@@ -16,6 +16,7 @@ import shelve
 
 from dail.compgraph import build_compgraph
 from dail.utils import *
+from dail.graphs.ddpg.utils import *
 
 class GracefulKiller:
     """ Gracefully exit program on CTRL-C """
@@ -298,8 +299,10 @@ class DDPGAgent():
 
             # Graph variable initialization
             self.sess.run(tf.global_variables_initializer())
-            self.saver_expert.restore(self.sess, self.load_expert_dir+'/expert.ckpt')
-
+            if expert_type(self.env['expert']['name']) == 'dail':
+                self.saver_expert.restore(self.sess, self.load_expert_dir+'/expert.ckpt')
+            else:
+                load_policy_weights(self.sess, self.env['expert']['name'])
 
             # Don't restore the inverse map when transfering
             self.learner_save_vars = [var for var in self.learner_save_vars if 'invmap' not in var.name]
@@ -357,8 +360,10 @@ class DDPGAgent():
 
         # Graph variable initialization
         self.sess.run(tf.global_variables_initializer())
-        self.saver_expert.restore(self.sess, self.load_expert_dir+'/expert.ckpt')
-
+        if expert_type(self.env['expert']['name']) == 'dail':
+            self.saver_expert.restore(self.sess, self.load_expert_dir + '/expert.ckpt')
+        else:
+            load_policy_weights(self.sess, self.env['expert']['name'])
 
         # Training learner from ckpt
         if from_ckpt:
@@ -554,7 +559,10 @@ class DDPGAgent():
 
         # Graph variable initialization
         self.sess.run(tf.global_variables_initializer())
-        self.saver_expert.restore(self.sess, self.load_expert_dir+'/expert.ckpt')
+        if expert_type(self.env['expert']['name']) == 'dail':
+            self.saver_expert.restore(self.sess, self.load_expert_dir + '/expert.ckpt')
+        else:
+            load_policy_weights(self.sess, self.env['expert']['name'])
 
         # Don't restore the inverse map when transfering
         self.learner_save_vars = [var for var in self.learner_save_vars if 'invmap' not in var.name]
@@ -702,7 +710,10 @@ class DDPGAgent():
 
     def create_demonstrations(self, num_demo):
         self.sess.run(tf.global_variables_initializer())
-        self.saver_expert.restore(self.sess, self.load_expert_dir+'/expert.ckpt')
+        if expert_type(self.env['expert']['name']) == 'dail':
+            self.saver_expert.restore(self.sess, self.load_expert_dir + '/expert.ckpt')
+        else:
+            load_policy_weights(self.sess, self.env['expert']['name'])
 
         # Create dataset
         vid_name = self.args.doc if self.args.doc else 'target_expert_demo'
@@ -728,7 +739,10 @@ class DDPGAgent():
     def rollout_expert(self):
         # Graph variable initialization
         self.sess.run(tf.global_variables_initializer())
-        self.saver_expert.restore(self.sess, self.load_expert_dir+'/expert.ckpt')
+        if expert_type(self.env['expert']['name']) == 'dail':
+            self.saver_expert.restore(self.sess, self.load_expert_dir + '/expert.ckpt')
+        else:
+            load_policy_weights(self.sess, self.env['expert']['name'])
 
         # Visualize loaded expert policy
         vid_name = self.args.doc + '_{}'.format(self.load_expert_dir[-1]) if self.args.doc else self.load_expert_dir[-6:]

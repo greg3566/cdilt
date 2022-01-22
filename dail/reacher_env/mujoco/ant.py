@@ -1275,7 +1275,7 @@ class Antv1_multi_goal(mujoco_env.MujocoEnv, utils.EzPickle):
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
         utils.EzPickle.__init__(self)        
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
         
         # no goal but constrain direction
@@ -1292,7 +1292,7 @@ class Antv1_multi_goal(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -1300,8 +1300,8 @@ class Antv1_multi_goal(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
-            print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
+        # if self.steps % 100 == 0:
+        #     print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
             reward,
@@ -1318,17 +1318,17 @@ class Antv1_multi_goal(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
                 [self.ct, self.st],
             ]
         )
@@ -1340,7 +1340,7 @@ class Antv1_multi_goal(mujoco_env.MujocoEnv, utils.EzPickle):
         self.theta = self.theta_list[idx] / 180.0 * math.pi
         self.ct = math.cos(self.theta)
         self.st = math.sin(self.theta)
-        print("[%d] direction %.2f" %(self.i_episode, self.theta))
+        # print("[%d] direction %.2f" %(self.i_episode, self.theta))
 
         # single goal
         qpos = self.init_qpos + self.np_random.uniform(
