@@ -99,3 +99,51 @@ cp -R mujoco_envs {ENV}/lib/python3.7/site-packages/gym/envs/mujoco
 '''
 and run with spinning up codes
 (will be updated more detail)
+
+'''
+ssh jaeseok@147.46.111.251
+jaeseok
+conda activate cdil
+'''
+
+environment setting
+'''
+python -m spinup.run sac_tf1 --env Antv1_1-v0 --exp_name Antv1_1 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_2-v0 --exp_name Antv1_2 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_3-v0 --exp_name Antv1_3 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_4-v0 --exp_name Antv1_4 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_5-v0 --exp_name Antv1_5 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_6-v0 --exp_name Antv1_6 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_7-v0 --exp_name Antv1_7 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_8-v0 --exp_name Antv1_8 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_9-v0 --exp_name Antv1_9 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_10-v0 --exp_name Antv1_10 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_11-v0 --exp_name Antv1_11 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv1_12-v0 --exp_name Antv1_12 --epochs 1000 --save_freq 10
+
+python -m spinup.run sac_tf1 --env Antv2_1-v0 --exp_name Antv2_1 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_2-v0 --exp_name Antv2_2 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_3-v0 --exp_name Antv2_3 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_4-v0 --exp_name Antv2_4 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_5-v0 --exp_name Antv2_5 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_6-v0 --exp_name Antv2_6 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_7-v0 --exp_name Antv2_7 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_8-v0 --exp_name Antv2_8 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_9-v0 --exp_name Antv2_9 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_10-v0 --exp_name Antv2_10 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_11-v0 --exp_name Antv2_11 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv2_12-v0 --exp_name Antv2_12 --epochs 1000 --save_freq 10
+
+python -m spinup.run sac_tf1 --env Antv3_1-v0 --exp_name Antv3_1 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_2-v0 --exp_name Antv3_2 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_3-v0 --exp_name Antv3_3 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_4-v0 --exp_name Antv3_4 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_5-v0 --exp_name Antv3_5 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_6-v0 --exp_name Antv3_6 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_7-v0 --exp_name Antv3_7 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_8-v0 --exp_name Antv3_8 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_9-v0 --exp_name Antv3_9 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_10-v0 --exp_name Antv3_10 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_11-v0 --exp_name Antv3_11 --epochs 1000 --save_freq 10
+python -m spinup.run sac_tf1 --env Antv3_12-v0 --exp_name Antv3_12 --epochs 1000 --save_freq 10
+'''
