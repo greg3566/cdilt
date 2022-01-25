@@ -4,6 +4,7 @@ cached_videos/
 target_demo*
 logs/temp/
 expert_data/taskset
+expert_data/demo/ant*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

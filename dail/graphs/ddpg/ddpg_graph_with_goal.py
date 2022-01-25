@@ -4,7 +4,7 @@ from pdb import set_trace
 import time
 
 from dail.model import *
-from .util import jacobian_loss
+from .utils import *
 
 
 #GOAL_SCALE = EXP_NJOINTS/LEA_NJOINTS
@@ -32,7 +32,7 @@ def ddpg_graph_with_goal(env, ph, params):
         EXP_NJOINTS = 3
     elif 'ant' in env['expert']['name']:
         print("here!")
-        EXP_NJOINTS = 15
+        EXP_NJOINTS = 57
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
 
@@ -40,12 +40,13 @@ def ddpg_graph_with_goal(env, ph, params):
         LEA_NJOINTS = 2
     elif 'reacher3' in env['learner']['name']:
         LEA_NJOINTS = 3
-    elif 'ant' in env['expert']['name']:
+    elif 'ant' in env['learner']['name']:
         print("here!")
-        LEA_NJOINTS = 15
+        LEA_NJOINTS = 57
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized learner env name {}'.format(env['learner']['name']))
 
+    EXPERT_TYPE = expert_type(env['expert']['name'])
 
     # Make sure that expert graph is set up  first
     for d_ in sorted(env.keys()):
@@ -55,12 +56,15 @@ def ddpg_graph_with_goal(env, ph, params):
         # ========= ACTOR ==========
         # Expert policy
         if d_ == 'expert':
-            graph[d_]['action'] = feedforward(in_node=ph[d_]['state'],
-                                              is_training=ph[d_]['is_training'],
-                                              params=params[d_]['actor'],
-                                              scope='actor/'+d_, scale=True,
-                                              scale_fn=scale_action,
-                                              scale_params=env[d_]['env'])
+            if EXPERT_TYPE == 'dail':
+                graph[d_]['action'] = feedforward(in_node=ph[d_]['state'],
+                                                  is_training=ph[d_]['is_training'],
+                                                  params=params[d_]['actor'],
+                                                  scope='actor/'+d_, scale=True,
+                                                  scale_fn=scale_action,
+                                                  scale_params=env[d_]['env'])
+            else:
+                graph[d_]['action'] = load_policy_graph(ph[d_]['state'], env['expert']['name'])
 
         # Self policy
         else:
@@ -454,7 +458,7 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             EXP_NJOINTS = 3
         elif 'ant' in env['expert']['name']:
             print("here!")
-            EXP_NJOINTS = 15    
+            EXP_NJOINTS = 57
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
 
@@ -462,9 +466,9 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             LEA_NJOINTS = 2
         elif 'reacher3' in env['learner']['name']:
             LEA_NJOINTS = 3
-        elif 'ant' in env['expert']['name']:
+        elif 'ant' in env['learner']['name']:
             print("here!")
-            LEA_NJOINTS = 15
+            LEA_NJOINTS = 57
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized learner env name {}'.format(env['learner']['name']))
 
@@ -555,7 +559,10 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
             lr_decay_actor = params[d_]['actor']['lr_decay']
             actor_op = tf.train.AdamOptimizer(lr_actor*lr_decay_actor**episodes)
             actor_grads_and_vars = actor_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['actor_grad_vars'])
-            actor_train_op = actor_op.apply_gradients(grads_and_vars=actor_grads_and_vars)
+            if d_ == 'learner' or env['expert']['name']=='dail':
+                actor_train_op = actor_op.apply_gradients(grads_and_vars=actor_grads_and_vars)
+            else:
+                actor_train_op = tf.constant(0)
             if d_ == 'learner':
                 time_multiplier_op = tf.train.AdamOptimizer(20.*lr_actor*lr_decay_actor ** episodes, beta1=0.5)
                 time_multiplier_grads_and_vars = time_multiplier_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['time_multiplier_grad_vars'])
@@ -565,11 +572,13 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
 
             #============= Behavioral cloning for target expert ===============
             if d_ == 'expert':
-                lr_bc = params['bc']['lr']
-                bc_op = tf.train.AdamOptimizer(lr_bc)
-                bc_grads_and_vars = bc_op.compute_gradients(loss=bc_loss, var_list=var_dict[d_]['actor_grad_vars'])
-                bc_train_op = bc_op.apply_gradients(grads_and_vars=bc_grads_and_vars)
-
+                if env['expert']['name']=='dail':
+                    lr_bc = params['bc']['lr']
+                    bc_op = tf.train.AdamOptimizer(lr_bc)
+                    bc_grads_and_vars = bc_op.compute_gradients(loss=bc_loss, var_list=var_dict[d_]['actor_grad_vars'])
+                    bc_train_op = bc_op.apply_gradients(grads_and_vars=bc_grads_and_vars)
+                else:
+                    bc_train_op = tf.constant(0)
 
             #============= Autoencoding loss ==============
             if d_ == 'learner':
