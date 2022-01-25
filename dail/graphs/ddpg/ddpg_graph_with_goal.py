@@ -31,8 +31,13 @@ def ddpg_graph_with_goal(env, ph, params):
     elif 'reacher3' in env['expert']['name']:
         EXP_NJOINTS = 3
     elif 'ant' in env['expert']['name']:
-        print("here!")
         EXP_NJOINTS = 57
+    elif 'Antv1' in env['expert']['name']:
+        print("Expert domain is Ant version 1.0")
+        EXP_NJOINTS = 55
+    elif 'Antv2' in env['expert']['name']:
+        print("Expert domain is Ant version 2.0")
+        EXP_NJOINTS = 79
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
 
@@ -43,6 +48,12 @@ def ddpg_graph_with_goal(env, ph, params):
     elif 'ant' in env['learner']['name']:
         print("here!")
         LEA_NJOINTS = 57
+    elif 'Antv1' in env['learner']['name']:
+        print("Learner domain is Ant version 1.0")
+        LEA_NJOINTS = 55
+    elif 'Antv2' in env['learner']['name']:
+        print("Learner domain is Ant version 2.0")
+        LEA_NJOINTS = 79
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized learner env name {}'.format(env['learner']['name']))
 
@@ -459,6 +470,10 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
         elif 'ant' in env['expert']['name']:
             print("here!")
             EXP_NJOINTS = 57
+        elif 'Antv1' in env['expert']['name']:
+            EXP_NJOINTS = 55
+        elif 'Antv2' in env['expert']['name']:
+            EXP_NJOINTS = 79
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
 
@@ -469,6 +484,10 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
         elif 'ant' in env['learner']['name']:
             print("here!")
             LEA_NJOINTS = 57
+        elif 'Antv1' in env['learner']['name']:
+            LEA_NJOINTS = 55
+        elif 'Antv2' in env['learner']['name']:
+            LEA_NJOINTS = 79
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized learner env name {}'.format(env['learner']['name']))
 

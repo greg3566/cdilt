@@ -17,6 +17,8 @@ def load_policy_graph(state, env_name):
     assert expert_type(env_name) != 'dail'
     if 'ant' in env_name:
         fpath = 'policy/Antv1_multi_goal/Antv1_multi_goal_s0/tf1_save'
+    #elif 'Antv1_1' in env_name:
+    #    fpath = 'policy/Antv1_1/Antv1_1_s0/tf1_save300'
         # model_info = joblib.load(osp.join(fpath, 'model_info.pkl'))
         # print(model_info)
         # {'inputs': {'x': 'Placeholder:0', 'a': 'Placeholder_1:0'}, 'outputs': {'mu': 'main/mul:0', 'q2': 'main/q2/Squeeze:0', 'q1': 'main/q1/Squeeze:0', 'pi': 'main/mul_1:0'}}
