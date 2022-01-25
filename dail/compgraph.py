@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import math
 from pdb import set_trace
 
 from dail.model import feedforward, scale_action, scale_state
@@ -31,6 +32,17 @@ def get_ddpg_ph(env):
         ph[d_]['raw_action'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['action_dim']], name=d_+'_raw_action_ph')
         ph[d_]['train_disc'] = tf.placeholder(dtype=tf.float32, shape=(), name=d_+'_train_disc_ph') # for stabilizing gan training
         ph[d_]['gen_weight'] = tf.placeholder(dtype=tf.float32, shape=(), name=d_+'_gen_weight_ph') # for stabilizing gan training
+
+        theta_list = [10.0, -10.0, 80.0, 100.0,
+                      -80.0, -100.0, 170.0, -170.0,
+                      45.0, 135.0, -45.0, -135.0]
+        if 'Ant' in env[d_]['name']
+            s = env[d_]['name'].find('_')
+            e = env[d_]['name'].find('-')
+            idx = int(env[d_]['name'][s + 1:e])
+            goal_dir = [math.cos(theta_list[idx]), math.sin(theta_list[idx])]
+            ph[d_]['state'] = tf.concat([ph[d_]['state'], tf.constant(goal_dir)], axis=1)
+            ph[d_]['next_state'] = tf.concat([ph[d_]['next_state'], tf.constant(goal_dir)], axis=1)
 
     return ph
 
