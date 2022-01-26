@@ -21,8 +21,8 @@ def get_ddpg_ph(env):
     ph = {}
     for d_, env_params in env.items():
         ph[d_] = {}
-        ph[d_]['state'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['state_dim']], name=d_+'_state_ph')
-        ph[d_]['next_state'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['state_dim']], name=d_+'_next_state_ph')
+        ph[d_]['raw_state'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['state_dim']], name=d_+'_state_ph')
+        ph[d_]['next_raw_state'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['state_dim']], name=d_+'_next_state_ph')
         ph[d_]['action'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['action_dim']], name=d_+'_action_ph')
         ph[d_]['action_tv'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['action_dim']], name=d_+'_action_tv_ph')
         ph[d_]['reward'] = tf.placeholder(dtype=tf.float32, shape=[None], name=d_+'_reward_ph')
@@ -36,13 +36,16 @@ def get_ddpg_ph(env):
         theta_list = [10.0, -10.0, 80.0, 100.0,
                       -80.0, -100.0, 170.0, -170.0,
                       45.0, 135.0, -45.0, -135.0]
-        if 'Ant' in env[d_]['name']
+        if 'Ant' in env[d_]['name']:
             s = env[d_]['name'].find('_')
-            e = env[d_]['name'].find('-')
-            idx = int(env[d_]['name'][s + 1:e])
-            goal_dir = [math.cos(theta_list[idx]), math.sin(theta_list[idx])]
-            ph[d_]['state'] = tf.concat([ph[d_]['state'], tf.constant(goal_dir)], axis=1)
-            ph[d_]['next_state'] = tf.concat([ph[d_]['next_state'], tf.constant(goal_dir)], axis=1)
+            idx = int(env[d_]['name'][s + 1:])
+            goal_dir = [[math.cos(theta_list[idx]), math.sin(theta_list[idx])]]
+            goal_dir = 0*ph[d_]['raw_state'][:, :2]+goal_dir  ## TODO: do better
+            ph[d_]['state'] = tf.concat([ph[d_]['raw_state'], goal_dir], axis=1)
+            ph[d_]['next_state'] = tf.concat([ph[d_]['next_raw_state'], goal_dir], axis=1)
+        else:
+            ph[d_]['state'] = ph[d_]['raw_state']
+            ph[d_]['next_state'] = ph[d_]['next_raw_state']
 
     return ph
 

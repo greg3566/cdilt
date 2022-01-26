@@ -34,7 +34,7 @@ def ddpg_graph_with_goal(env, ph, params):
         EXP_NJOINTS = 57
     elif 'Antv1' in env['expert']['name']:
         print("Expert domain is Ant version 1.0")
-        EXP_NJOINTS = 55
+        EXP_NJOINTS = 57
     elif 'Antv2' in env['expert']['name']:
         print("Expert domain is Ant version 2.0")
         EXP_NJOINTS = 79
@@ -50,7 +50,7 @@ def ddpg_graph_with_goal(env, ph, params):
         LEA_NJOINTS = 57
     elif 'Antv1' in env['learner']['name']:
         print("Learner domain is Ant version 1.0")
-        LEA_NJOINTS = 55
+        LEA_NJOINTS = 57
     elif 'Antv2' in env['learner']['name']:
         print("Learner domain is Ant version 2.0")
         LEA_NJOINTS = 79
@@ -75,7 +75,12 @@ def ddpg_graph_with_goal(env, ph, params):
                                                   scale_fn=scale_action,
                                                   scale_params=env[d_]['env'])
             else:
-                graph[d_]['action'] = load_policy_graph(ph[d_]['state'], env['expert']['name'])
+                if 'Ant' in env[d_]['name']:
+                    agent_state = tf.concat([ph[d_]['state'][:, :2 * LEA_NJOINTS],
+                                             ph[d_]['state'][:, 2 * LEA_NJOINTS + 2:]], axis=1)
+                    graph[d_]['action'] = load_policy_graph(agent_state, env['expert']['name'])
+                else:
+                    graph[d_]['action'] = load_policy_graph(ph[d_]['state'], env['expert']['name'])
 
         # Self policy
         else:

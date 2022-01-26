@@ -74,6 +74,8 @@ def generate_params(env):
         actionlr = 1e-3
 
         goal_dim = 2
+        if 'Ant' in env['expert']['name']:
+            goal_dim = 0  # goal is not included in state
 
         expert_params = {'actor': {'lr': actlr_expert,
                                    'lr_decay': lr_decay,
@@ -134,6 +136,11 @@ def generate_params(env):
                          # 'auto': {'lr': autolr,
                          #          'lr_decay': 1.}
                         }
+
+        if 'Ant' in env['expert']['name']:
+            goal_dim = 0  # goal is not included in state
+        else:
+            goal_dim = 2
 
         learner_params = {'use_bc': True,
                           'actor': {'lr': actlr_learner,
