@@ -393,7 +393,7 @@ class DDPGAgent():
         step = 0
         dynamics_loss = []
 #        for idx in range(10):
-        for idx in range(100000):
+        for idx in range(100000*0+1):
 
             # grab N (s,a,r,s') tuples from replay memory
             minibatch_l = self.replay_memory['learner'].sample_from_memory(batchsize=self.params['train']['batchsize'])

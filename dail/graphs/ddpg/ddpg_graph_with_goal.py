@@ -60,6 +60,15 @@ def ddpg_graph_with_goal(env, ph, params):
                                               scale_fn=scale_action,
                                               scale_params=env[d_]['env'])
 
+            # # Actionmapping from expert to learner space
+            # with tf.variable_scope('', reuse=tf.AUTO_REUSE):
+            #     graph[d_]['mapped_action'] = feedforward(in_node=graph[d_]['action'],
+            #                                       is_training=ph[trans_d_]['is_training'],
+            #                                       params=params[trans_d_]['actionmap'],
+            #                                       scope='actor/' + trans_d_ + '/actionmap',
+            #                                       scale=True, scale_fn=scale_action,
+            #                                       scale_params=env[trans_d_]['env'])
+
         # Self policy
         else:
             with tf.variable_scope('', reuse=tf.AUTO_REUSE):
@@ -83,6 +92,16 @@ def ddpg_graph_with_goal(env, ph, params):
                                                        axis=1)
 
                 graph[d_]['mapped_state_end'] = graph[d_]['mapped_state']
+
+                next_agent_state = tf.concat([ph[d_]['next_state'][:, :2 * LEA_NJOINTS],
+                                              ph[d_]['next_state'][:, 2 * LEA_NJOINTS + 2:]], axis=1)
+
+                graph[d_]['mapped_next_agent_state'] = feedforward(in_node=next_agent_state,
+                                                              is_training=ph[d_]['is_training'],
+                                                              params=params[d_]['statemap'],
+                                                              scope='actor/' + d_ + '/statemap',
+                                                              scale=params['train']['scale_state'],
+                                                              scale_fn=scale_state, scale_params=env[trans_d_]['env'])
 
 
                 # Inverse statemap from expert agent state to learner agent state
@@ -320,11 +339,25 @@ def ddpg_graph_with_goal(env, ph, params):
 
     with tf.variable_scope('discriminator', reuse=tf.AUTO_REUSE):
         # real and fake samples
+        # sas_fake = tf.concat([graph[d_]['mapped_state_end'],
+        #                       graph[d_]['premap_action'],
+        #                       mapped_next_state], axis=1)
+        # sas_real = tf.concat([ph[trans_d_]['state'],
+        #                       ph[trans_d_]['action'],
+        #                       ph[trans_d_]['next_state']],
+        #                      axis=1)
+
+        mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier'] * (
+                graph[d_]['mapped_next_agent_state'] - graph[d_]['mapped_agent_state'])
+        mapped_next_state = tf.concat([mapped_agent_next_state[:, :2 * EXP_NJOINTS],
+                                                    goal_state,
+                                                    mapped_agent_next_state[:, 2 * EXP_NJOINTS:]],
+                                                   axis=1)
         sas_fake = tf.concat([graph[d_]['mapped_state_end'],
-                              graph[d_]['premap_action'],
+                              ph[d_]['action'],
                               mapped_next_state], axis=1)
         sas_real = tf.concat([ph[trans_d_]['state'],
-                              ph[trans_d_]['action'],
+                              graph[trans_d_]['mapped_action'],
                               ph[trans_d_]['next_state']],
                              axis=1)
 
