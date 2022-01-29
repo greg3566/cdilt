@@ -399,7 +399,7 @@ class DDPGAgent():
         dynamics_loss = []
 #        for idx in range(10):
         for idx in range(100000):
-
+            break # TODO: args
             # grab N (s,a,r,s') tuples from replay memory
             minibatch_l = self.replay_memory['learner'].sample_from_memory(batchsize=self.params['train']['batchsize'])
 
@@ -491,7 +491,7 @@ class DDPGAgent():
 
             # Evaluate episode reward of learner (TODO)
             readouts[d_]['total_reward'] = self.render_statemap({'epsilon': epsilon},
-                                                                num_rollout=25,
+                                                                num_rollout=5,
                                                                 save_video=False,
                                                                 save_dir='learner_policy')
 

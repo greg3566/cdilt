@@ -27,7 +27,7 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # utils.EzPickle.__init__(self)
         
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
         # original
         # xposbefore = self.get_body_com("torso")[0]
@@ -36,7 +36,7 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # forward_reward = (xposafter - xposbefore) / self.dt
         # ctrl_cost = 0.5 * np.square(a).sum()
         # contact_cost = (
-        #     0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+        #     0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         # )
         # survive_reward = 1.0
         # reward = forward_reward - ctrl_cost - contact_cost + survive_reward
@@ -44,7 +44,7 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         # done = not notdone
         # ob = self._get_obs()
-        # if self.steps % 100 == 0:
+        # if self.steps % 100 == 0 and False:
         #     print("[%d] %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1]))
         # return (
         #     ob,
@@ -70,7 +70,7 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         vertical_cost = (abs(-xposafter * math.sin(self.theta) + yposafter * math.cos(self.theta)) - abs(-xposbefore * math.sin(self.theta) + yposafter * math.cos(self.theta))) / self.dt
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -79,7 +79,7 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         done = not notdone
         ob = self._get_obs()
         print(ob)
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -103,14 +103,14 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # dist_reward = (np.linalg.norm(vecbefore) - np.linalg.norm(vecafter)) / self.dt
         # ctrl_cost = 0.5 * np.square(a).sum()
         # contact_cost = (
-        #     0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+        #     0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         # )
         # survive_reward = 1.0
         # reward = dist_reward - ctrl_cost - contact_cost + survive_reward
         # state = self.state_vector()
         # notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         # done = not notdone
-        # if self.steps % 100 == 0:
+        # if self.steps % 100 == 0 and False:
         #     print("[%d] dist: %.3f" %(self.i_episode, np.linalg.norm(vecafter)))
         # if np.linalg.norm(vecafter) < 0.1:
         #     done = True
@@ -138,7 +138,7 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.do_simulation(a, self.frame_skip)
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = - dist_cost - ctrl_cost - contact_cost + survive_reward
@@ -165,17 +165,17 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         # original
         # return np.concatenate(
         #     [
-        #         self.sim.data.qpos.flat[2:],
-        #         self.sim.data.qvel.flat,
-        #         np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+        #         self.model.data.qpos.flat[2:],
+        #         self.model.data.qvel.flat,
+        #         np.clip(self.model.data.cfrc_ext, -1, 1).flat,
         #     ]
         # )
         # single goal
         return np.concatenate(
             [
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -206,6 +206,17 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
 
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
+
+
 class Antv1_1(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         self.i_episode = 0
@@ -217,11 +228,11 @@ class Antv1_1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
     def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -244,7 +255,7 @@ class Antv1_1(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -293,6 +304,16 @@ class Antv1_1(mujoco_env.MujocoEnv, utils.EzPickle):
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
 
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
+
 
 class Antv1_2(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
@@ -305,11 +326,11 @@ class Antv1_2(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -324,7 +345,7 @@ class Antv1_2(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -332,7 +353,7 @@ class Antv1_2(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -350,17 +371,17 @@ class Antv1_2(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -380,6 +401,16 @@ class Antv1_2(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_3(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -393,11 +424,11 @@ class Antv1_3(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -412,7 +443,7 @@ class Antv1_3(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -420,7 +451,7 @@ class Antv1_3(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -438,17 +469,17 @@ class Antv1_3(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -468,6 +499,16 @@ class Antv1_3(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_4(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -481,11 +522,11 @@ class Antv1_4(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -500,7 +541,7 @@ class Antv1_4(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -508,7 +549,7 @@ class Antv1_4(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -526,17 +567,17 @@ class Antv1_4(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -556,6 +597,16 @@ class Antv1_4(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_5(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -569,11 +620,11 @@ class Antv1_5(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -588,7 +639,7 @@ class Antv1_5(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -596,7 +647,7 @@ class Antv1_5(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -614,17 +665,17 @@ class Antv1_5(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -644,6 +695,16 @@ class Antv1_5(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_6(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -657,11 +718,11 @@ class Antv1_6(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -676,7 +737,7 @@ class Antv1_6(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -684,7 +745,7 @@ class Antv1_6(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -702,17 +763,17 @@ class Antv1_6(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -732,6 +793,16 @@ class Antv1_6(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_7(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -745,11 +816,11 @@ class Antv1_7(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -764,7 +835,7 @@ class Antv1_7(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -772,7 +843,7 @@ class Antv1_7(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -790,17 +861,17 @@ class Antv1_7(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -820,6 +891,16 @@ class Antv1_7(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_8(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -833,11 +914,11 @@ class Antv1_8(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -852,7 +933,7 @@ class Antv1_8(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -860,7 +941,7 @@ class Antv1_8(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -878,17 +959,17 @@ class Antv1_8(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -908,6 +989,16 @@ class Antv1_8(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_9(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -921,11 +1012,11 @@ class Antv1_9(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -940,7 +1031,7 @@ class Antv1_9(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -948,7 +1039,7 @@ class Antv1_9(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -966,17 +1057,17 @@ class Antv1_9(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -996,6 +1087,16 @@ class Antv1_9(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_10(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -1009,11 +1110,11 @@ class Antv1_10(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -1028,7 +1129,7 @@ class Antv1_10(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -1036,7 +1137,7 @@ class Antv1_10(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -1054,17 +1155,17 @@ class Antv1_10(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -1084,6 +1185,16 @@ class Antv1_10(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_11(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -1097,11 +1208,11 @@ class Antv1_11(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -1116,7 +1227,7 @@ class Antv1_11(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -1124,7 +1235,7 @@ class Antv1_11(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -1142,17 +1253,17 @@ class Antv1_11(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -1172,6 +1283,16 @@ class Antv1_11(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
 
 
 class Antv1_12(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -1185,11 +1306,11 @@ class Antv1_12(mujoco_env.MujocoEnv, utils.EzPickle):
         self.diverge_penalty_ratio = 2.0
 
         mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
-        utils.EzPickle.__init__(self)        
+        utils.EzPickle.__init__(self)
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
-        
+
         # no goal but constrain direction
         xb = self.get_body_com("torso")[0]
         yb = self.get_body_com("torso")[1]
@@ -1204,7 +1325,7 @@ class Antv1_12(mujoco_env.MujocoEnv, utils.EzPickle):
             vertical_cost = vertical_cost * self.diverge_penalty_ratio
         ctrl_cost = 0.5 * np.square(a).sum()
         contact_cost = (
-            0.5 * 1e-3 * np.sum(np.square(np.clip(self.sim.data.cfrc_ext, -1, 1)))
+            0.5 * 1e-3 * np.sum(np.square(np.clip(self.model.data.cfrc_ext, -1, 1)))
         )
         survive_reward = 1.0
         reward = forward_reward - vertical_cost - ctrl_cost - contact_cost + survive_reward
@@ -1212,7 +1333,7 @@ class Antv1_12(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if self.steps % 100 == 0 and False:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -1230,17 +1351,17 @@ class Antv1_12(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _get_obs(self):
         # single goal
-        x = self.sim.data.qpos.flat[0]
-        y = self.sim.data.qpos.flat[1]
+        x = self.model.data.qpos.flat[0]
+        y = self.model.data.qpos.flat[1]
         r = math.sqrt(x ** 2 + y ** 2)
         ct = x / r
         st = y / r
         return np.concatenate(
             [
                 [r, ct, st],
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat,
-                np.clip(self.sim.data.cfrc_ext, -1, 1).flat,
+                self.model.data.qpos.flat[2:],
+                self.model.data.qvel.flat,
+                np.clip(self.model.data.cfrc_ext, -1, 1).flat,
             ]
         )
 
@@ -1260,6 +1381,17 @@ class Antv1_12(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)
+
 
 class Antv1_multi_goal(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
@@ -1300,7 +1432,7 @@ class Antv1_multi_goal(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        # if self.steps % 100 == 0:
+        # if self.steps % 100 == 0 and False:
         #     print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
         return (
             ob,
@@ -1354,3 +1486,13 @@ class Antv1_multi_goal(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
+
+    def set_state_from_obs(self, obs):
+        r = obs[0]
+        ct = obs[1]
+        st = obs[2]
+        pos = [r * ct, r * st]
+        qpos = np.concatenate([pos, obs[3:16]], axis=0)
+        qvel = obs[16:30]
+
+        self.set_state(qpos, qvel)

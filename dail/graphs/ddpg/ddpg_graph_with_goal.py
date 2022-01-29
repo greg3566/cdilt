@@ -9,8 +9,9 @@ from .utils import *
 
 #GOAL_SCALE = EXP_NJOINTS/LEA_NJOINTS
 GOAL_SCALE = 1.
+USE_TM = True
 USE_SAE = True
-
+USE_AX = True
 
 def ddpg_graph_with_goal(env, ph, params):
     '''
@@ -106,6 +107,16 @@ def ddpg_graph_with_goal(env, ph, params):
 
                 graph[d_]['mapped_state_end'] = graph[d_]['mapped_state']
 
+                if USE_AX:
+                    next_agent_state = tf.concat([ph[d_]['next_state'][:, :2 * LEA_NJOINTS],
+                                                  ph[d_]['next_state'][:, 2 * LEA_NJOINTS + 2:]], axis=1)
+
+                    graph[d_]['mapped_next_agent_state'] = feedforward(in_node=next_agent_state,
+                                                                  is_training=ph[d_]['is_training'],
+                                                                  params=params[d_]['statemap'],
+                                                                  scope='actor/' + d_ + '/statemap',
+                                                                  scale=params['train']['scale_state'],
+                                                                  scale_fn=scale_state, scale_params=env[trans_d_]['env'])
 
                 # Inverse statemap from expert agent state to learner agent state
                 graph[d_]['inv_agent_state'] = feedforward(in_node=graph[d_]['mapped_agent_state'],
@@ -341,8 +352,11 @@ def ddpg_graph_with_goal(env, ph, params):
                                       axis=1)
 
     with tf.variable_scope('time_multiplier', reuse=tf.AUTO_REUSE):
-        graph[d_]['time_multiplier'] = tf.math.exp(
-            1.*tf.get_variable(name='log', initializer=0.0))
+        if USE_TM:
+            graph[d_]['time_multiplier'] = tf.math.exp(
+                1.*tf.get_variable(name='log', initializer=0.0))
+        else:
+            graph[d_]['time_multiplier'] = tf.constant(1)
 
     # Map learner next state to expert space
     with tf.variable_scope('actor', reuse=True):
@@ -350,8 +364,9 @@ def ddpg_graph_with_goal(env, ph, params):
                                               params=params[d_]['statemap'], scope=d_+'/statemap',
                                               scale=params['train']['scale_state'],
                                               scale_fn=scale_state, scale_params=env[d_]['env'])
-        mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier']*(mapped_agent_next_state - graph[d_]['mapped_agent_state'])
-        #mapped_agent_next_state = 1.0*mapped_agent_next_state
+        if USE_TM:
+            mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier'] * (
+                        mapped_agent_next_state - graph[d_]['mapped_agent_state'])
         mapped_next_state = tf.concat([mapped_agent_next_state[:, :2*EXP_NJOINTS],
                                        next_goal_state,
                                        mapped_agent_next_state[:, 2*EXP_NJOINTS:]],
@@ -371,13 +386,28 @@ def ddpg_graph_with_goal(env, ph, params):
 
     with tf.variable_scope('discriminator', reuse=tf.AUTO_REUSE):
         # real and fake samples
-        sas_fake = tf.concat([graph[d_]['mapped_state_end'],
-                              graph[d_]['premap_action'],
-                              mapped_next_state], axis=1)
-        sas_real = tf.concat([ph[trans_d_]['state'],
-                              ph[trans_d_]['action'],
-                              ph[trans_d_]['next_state']],
-                             axis=1)
+        if USE_AX:
+            mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier'] * (
+                    graph[d_]['mapped_next_agent_state'] - graph[d_]['mapped_agent_state'])
+            mapped_next_state = tf.concat([mapped_agent_next_state[:, :2 * EXP_NJOINTS],
+                                           goal_state,
+                                           mapped_agent_next_state[:, 2 * EXP_NJOINTS:]],
+                                          axis=1)
+            sas_fake = tf.concat([graph[d_]['mapped_state_end'],
+                                  ph[d_]['action'],
+                                  mapped_next_state], axis=1)
+            sas_real = tf.concat([ph[trans_d_]['state'],
+                                  graph[trans_d_]['mapped_action'],
+                                  ph[trans_d_]['next_state']],
+                                 axis=1)
+        else:
+            sas_fake = tf.concat([graph[d_]['mapped_state_end'],
+                                  graph[d_]['premap_action'],
+                                  mapped_next_state], axis=1)
+            sas_real = tf.concat([ph[trans_d_]['state'],
+                                  ph[trans_d_]['action'],
+                                  ph[trans_d_]['next_state']],
+                                 axis=1)
 
         graph[d_]['fake_prob'] = feedforward(in_node=sas_fake,
                                              is_training=ph[d_]['is_training'],
@@ -587,7 +617,7 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                 actor_train_op = actor_op.apply_gradients(grads_and_vars=actor_grads_and_vars)
             else:
                 actor_train_op = tf.constant(0)
-            if d_ == 'learner':
+            if d_ == 'learner' and USE_TM:
                 time_multiplier_op = tf.train.AdamOptimizer(20.*lr_actor*lr_decay_actor ** episodes, beta1=0.5)
                 time_multiplier_grads_and_vars = time_multiplier_op.compute_gradients(loss=actor_loss, var_list=var_dict[d_]['time_multiplier_grad_vars'])
                 time_multiplier_train_op = time_multiplier_op.apply_gradients(grads_and_vars=time_multiplier_grads_and_vars)
