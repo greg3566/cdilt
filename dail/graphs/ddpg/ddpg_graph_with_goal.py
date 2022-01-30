@@ -387,8 +387,11 @@ def ddpg_graph_with_goal(env, ph, params):
     with tf.variable_scope('discriminator', reuse=tf.AUTO_REUSE):
         # real and fake samples
         if USE_AX:
-            mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier'] * (
-                    graph[d_]['mapped_next_agent_state'] - graph[d_]['mapped_agent_state'])
+            if USE_TM:
+                mapped_agent_next_state = graph[d_]['mapped_agent_state'] + graph[d_]['time_multiplier'] * (
+                        graph[d_]['mapped_next_agent_state'] - graph[d_]['mapped_agent_state'])
+            else:
+                mapped_agent_next_state = graph[d_]['mapped_next_agent_state']
             mapped_next_state = tf.concat([mapped_agent_next_state[:, :2 * EXP_NJOINTS],
                                            goal_state,
                                            mapped_agent_next_state[:, 2 * EXP_NJOINTS:]],

@@ -11,7 +11,7 @@ tmux kill-session -t $SESS_NAME
 tmux new-session -d -s $SESS_NAME -n 1
 
 BEGIN=1
-END=3
+END=1
 TOTAL_GPU=1
 
 for ((i=BEGIN; i<=END; i++)); do
