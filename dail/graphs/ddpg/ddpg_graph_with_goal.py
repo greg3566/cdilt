@@ -10,7 +10,7 @@ from .utils import *
 #GOAL_SCALE = EXP_NJOINTS/LEA_NJOINTS
 GOAL_SCALE = 1.
 USE_TM = True
-USE_SAE = True
+USE_SAE = False
 USE_AX = True
 
 def ddpg_graph_with_goal(env, ph, params):
@@ -68,20 +68,13 @@ def ddpg_graph_with_goal(env, ph, params):
         # ========= ACTOR ==========
         # Expert policy
         if d_ == 'expert':
-            if EXPERT_TYPE == 'dail':
-                graph[d_]['action'] = feedforward(in_node=ph[d_]['state'],
-                                                  is_training=ph[d_]['is_training'],
-                                                  params=params[d_]['actor'],
-                                                  scope='actor/'+d_, scale=True,
-                                                  scale_fn=scale_action,
-                                                  scale_params=env[d_]['env'])
-            else:
-                if 'Ant' in env[d_]['name']:
-                    agent_state = tf.concat([ph[d_]['state'][:, :2 * LEA_NJOINTS],
-                                             ph[d_]['state'][:, 2 * LEA_NJOINTS + 2:]], axis=1)
-                    graph[d_]['action'] = load_policy_graph(agent_state, env['expert']['name'])
-                else:
-                    graph[d_]['action'] = load_policy_graph(ph[d_]['state'], env['expert']['name'])
+            # TODO:
+            graph[d_]['action'] = feedforward(in_node=ph[d_]['state'],
+                                              is_training=ph[d_]['is_training'],
+                                              params=params[d_]['actor'],
+                                              scope='actor/'+d_, scale=True,
+                                              scale_fn=scale_action,
+                                              scale_params=env[d_]['env'])
 
         # Self policy
         else:
@@ -128,13 +121,18 @@ def ddpg_graph_with_goal(env, ph, params):
 
 
                 # Feed last state set thorugh expert policy
-                graph[d_]['premap_action'] = feedforward(in_node=graph[d_]['mapped_state_end'],
-                                                         is_training=ph[d_]['is_training'],
-                                                         params=params[trans_d_]['actor'],
-                                                         scope='actor/'+trans_d_,
-                                                         scale=True, scale_fn=scale_action,
-                                                         scale_params=env[trans_d_]['env'])
-
+                if EXPERT_TYPE == 'dail':
+                    graph[d_]['premap_action'] = feedforward(in_node=graph[d_]['mapped_state_end'],
+                                                             is_training=ph[d_]['is_training'],
+                                                             params=params[trans_d_]['actor'],
+                                                             scope='actor/'+trans_d_,
+                                                             scale=True, scale_fn=scale_action,
+                                                             scale_params=env[trans_d_]['env'])
+                else:
+                    if 'Ant' in env[d_]['name']:
+                        graph[d_]['premap_action'] = load_policy_graph(graph[d_]['mapped_agent_state'], env['expert']['name'])
+                    else:
+                        graph[d_]['premap_action'] = load_policy_graph(graph[d_]['mapped_state_end'], env['expert']['name'])
 
                 # Map expert action to learner action via actionmap
                 sa_action = tf.concat([graph[d_]['premap_action'], ph[d_]['state']], axis=1)
