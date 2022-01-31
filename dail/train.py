@@ -20,8 +20,8 @@ import random
 sys.path.append(os.getcwd() + '/..')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-import tensorflow as tf
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+# import tensorflow as tf
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 # Experiment modules
@@ -71,6 +71,16 @@ if os.path.isdir(args.logdir) and args.logdir != './logs/temp':
 #if args.gpu > -1:
 #    print("GPU COMPATIBLE RUN...")
 os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  try:
+    tf.config.experimental.set_virtual_device_configuration(
+        gpus[0],
+        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
+  except RuntimeError as e:
+    print(e)
 
 # Create the environment
 expert_domain = args.edomain

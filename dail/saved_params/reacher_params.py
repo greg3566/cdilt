@@ -66,7 +66,7 @@ def generate_params(env):
         criticlr = 1e-3
 
         modellr = 1e-3
-        disclr = 1e-3
+        disclr = 1e-4
         # setlr = 1e-3
 
         autolr = 1e-4
