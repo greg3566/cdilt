@@ -131,7 +131,7 @@ class Antv4_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if False and self.steps % 100 == 0:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
             if ra < 1.0:
                 print("[%d] Success!!" %(self.i_episode))
@@ -189,12 +189,12 @@ class Antv4_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
 
     def set_state_from_obs(self, obs):
-        pos = [obs[2], obs[3]]
+        pos = [self.R*obs[2], self.R*obs[3]]
         qpos = np.concatenate([pos, obs[4:17]], axis=0)
         qvel = obs[17:31]
 
         self.set_state(qpos, qvel)
-
+        self.target = obs[:2]
 
 
 class Antv4_target(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -292,8 +292,10 @@ class Antv4_target(mujoco_env.MujocoEnv, utils.EzPickle):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
 
     def set_state_from_obs(self, obs):
-        pos = [obs[2], obs[3]]
+        pos = [self.R*obs[2], self.R*obs[3]]
         qpos = np.concatenate([pos, obs[4:17]], axis=0)
         qvel = obs[17:31]
 
         self.set_state(qpos, qvel)
+        self.target = obs[:2]
+        
