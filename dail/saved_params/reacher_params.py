@@ -66,7 +66,7 @@ def generate_params(env):
         criticlr = 1e-3
 
         modellr = 1e-3
-        disclr = 1e-4
+        disclr = 1e-3
         # setlr = 1e-3
 
         autolr = 1e-4
@@ -74,8 +74,8 @@ def generate_params(env):
         actionlr = 1e-3
 
         goal_dim = 2
-        if 'Ant' in env['expert']['name']:
-            goal_dim = 0  # goal is not included in state
+        # if 'Ant' in env['expert']['name']:
+        #     goal_dim = 0  # goal is not included in state
 
         expert_params = {'actor': {'lr': actlr_expert,
                                    'lr_decay': lr_decay,
@@ -137,10 +137,9 @@ def generate_params(env):
                          #          'lr_decay': 1.}
                         }
 
-        if 'Ant' in env['expert']['name']:
-            goal_dim = 0  # goal is not included in state
-        else:
-            goal_dim = 2
+        goal_dim = 2
+        # if 'Ant' in env['expert']['name']:
+        #     goal_dim = 0  # goal is not included in state
 
         learner_params = {'use_bc': True,
                           'actor': {'lr': actlr_learner,
@@ -161,7 +160,7 @@ def generate_params(env):
 
                           'statemap': {'lr': statelr,
                                        'lr_decay': 1.,
-                                       'num_hidden': [200]*2 + [env['expert']['state_dim']-goal_dim],
+                                       'num_hidden': [256]*2 + [env['expert']['state_dim']-goal_dim],
                                        'activation': [act]*2 + [None],
                                        'init': [init]*3,
                                        'regularizer': ['l2']*3,
@@ -177,7 +176,7 @@ def generate_params(env):
 
                           'actionmap': {'lr': actionlr,
                                         'lr_decay': 1.,
-                                        'num_hidden': [200]*2 + [env['learner']['action_dim']],
+                                        'num_hidden': [256]*2 + [env['learner']['action_dim']],
                                         'activation': [act]*2 + [None],
                                         'init': [init]*3,
                                         'regularizer': ['l2']*3,
@@ -201,7 +200,7 @@ def generate_params(env):
 
                           'discriminator': {'lr': disclr,
                                             'lr_decay': lr_decay,
-                                            'num_hidden': [64]*2 + [1],
+                                            'num_hidden': [256]*2 + [1],
                                             'activation': [act]*2 + [None],
                                             'init': [init]*3,
                                             'regularizer': [None]*3,
