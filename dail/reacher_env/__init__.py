@@ -82,3 +82,10 @@ register(id='Antv3_10-v0', entry_point='dail.reacher_env.mujoco.ant_long:Antv3_1
 register(id='Antv3_11-v0', entry_point='dail.reacher_env.mujoco.ant_long:Antv3_11', max_episode_steps=1000)
 register(id='Antv3_12-v0', entry_point='dail.reacher_env.mujoco.ant_long:Antv3_12', max_episode_steps=1000)
 
+
+register(id='Antv4_alignment-v0', entry_point='dail.reacher_env.mujoco.ant_reacher:Antv4_alignment', max_episode_steps=200)
+register(id='Antv4_target-v0', entry_point='dail.reacher_env.mujoco.ant_reacher:Antv4_target', max_episode_steps=200)
+
+register(id='Antv5_alignment-v0', entry_point='dail.reacher_env.mujoco.ant_6legged_reacher:Antv5_alignment', max_episode_steps=200)
+register(id='Antv5_target-v0', entry_point='dail.reacher_env.mujoco.ant_6legged_reacher:Antv5_target', max_episode_steps=200)
+
