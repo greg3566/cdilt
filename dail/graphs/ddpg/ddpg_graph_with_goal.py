@@ -30,6 +30,9 @@ def ddpg_graph_with_goal(env, ph, params):
     if 'Antv4' in env['expert']['name']:
         print("Expert domain is Ant version 4.0 : Ant Multigoal")
         EXP_NJOINTS = 0
+    elif 'Antv5' in env['expert']['name']:
+        print("Expert domain is Ant version 5.0 : Ant 6-legged Multigoal")
+        EXP_NJOINTS = 0
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
         raise NotImplementedError
@@ -37,6 +40,10 @@ def ddpg_graph_with_goal(env, ph, params):
     if 'Antv4' in env['learner']['name']:
         print("Learner domain is Ant version 4.0 : Ant Multigoal")
         LEA_NJOINTS = 0
+    elif 'Antv5' in env['learner']['name']:
+        print("Learner domain is Ant version 5.0 : Ant 6-legged Multigoal")
+        LEA_NJOINTS = 0
+
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['learner']['name']))
         raise NotImplementedError
@@ -487,12 +494,18 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
         if 'Antv4' in env['expert']['name']:
             print("Expert domain is Ant version 4.0 : Ant Multigoal")
             EXP_NJOINTS = 0
+        elif 'Antv5' in env['expert']['name']:
+            print("Expert domain is Ant version 5.0 : Ant 6-legged Multigoal")
+            EXP_NJOINTS = 0
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
             raise NotImplementedError
 
         if 'Antv4' in env['learner']['name']:
             print("Learner domain is Ant version 4.0 : Ant Multigoal")
+            LEA_NJOINTS = 0
+        elif 'Antv5' in env['learner']['name']:
+            print("Learner domain is Ant version 5.0 : Ant 6-legged Multigoal")
             LEA_NJOINTS = 0
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['learner']['name']))

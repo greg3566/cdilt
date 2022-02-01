@@ -189,11 +189,12 @@ class Antv5_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
 
     def set_state_from_obs(self, obs):
-        pos = [obs[2], obs[3]]
+        pos = [self.R*obs[2], self.R*obs[3]]
         qpos = np.concatenate([pos, obs[4:21]], axis=0)
         qvel = obs[21:39]
 
         self.set_state(qpos, qvel)
+        self.target = obs[:2]
 
 class Antv5_target(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
@@ -290,8 +291,10 @@ class Antv5_target(mujoco_env.MujocoEnv, utils.EzPickle):
 
 
     def set_state_from_obs(self, obs):
-        pos = [obs[2], obs[3]]
+        pos = [self.R*obs[2], self.R*obs[3]]
         qpos = np.concatenate([pos, obs[4:21]], axis=0)
         qvel = obs[21:39]
 
         self.set_state(qpos, qvel)
+        self.target = obs[:2]
+

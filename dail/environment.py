@@ -143,6 +143,12 @@ def create_env(env_params, seed_dict):
         elif n_ == 'Antv4_target':
             curenv = gym.make('Antv4_target-v0')
             env_type = 'goal'
+        elif n_ == 'Antv5_alignment':
+            curenv = gym.make('Antv5_alignment-v0')
+            env_type = 'goal'
+        elif n_ == 'Antv5_target':
+            curenv = gym.make('Antv5_target-v0')
+            env_type = 'goal'
         else:
             print("Unrecognized environment name: {}".format(n_))
             exit(1)
