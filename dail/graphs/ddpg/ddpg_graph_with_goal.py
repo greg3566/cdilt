@@ -10,7 +10,7 @@ from .utils import *
 #GOAL_SCALE = EXP_NJOINTS/LEA_NJOINTS
 GOAL_SCALE = 1.
 USE_TM = True
-USE_SAE = False
+USE_SAE = True
 USE_AX = True
 
 def ddpg_graph_with_goal(env, ph, params):
@@ -122,14 +122,14 @@ def ddpg_graph_with_goal(env, ph, params):
                 # Map expert action to learner action via actionmap
                 sa_action = tf.concat([graph[d_]['premap_action'], ph[d_]['state']], axis=1)
                 if USE_SAE:
-                    agent_state_premap_action = tf.concat([agent_state, graph[d_]['premap_action']], axis=1)
+                    agent_state_premap_action = tf.concat([graph[d_]['mapped_agent_state'], graph[d_]['premap_action']], axis=1)
                     graph[d_]['action'] = feedforward(in_node=agent_state_premap_action,
                                                       is_training=ph[d_]['is_training'],
                                                       params=params[d_]['actionmap'],
                                                       scope='actor/'+d_+'/actionmap',
                                                       scale=True, scale_fn=scale_action,
                                                       scale_params=env[d_]['env'])
-                    graph[d_]['entangle_loss'] = jacobian_loss(graph[d_]['action'], agent_state)
+                    graph[d_]['entangle_loss'] = jacobian_loss(graph[d_]['action'], graph[d_]['mapped_agent_state'])
                 else:
                     graph[d_]['action'] = feedforward(in_node=graph[d_]['premap_action'],
                                                       is_training=ph[d_]['is_training'],
@@ -157,8 +157,8 @@ def ddpg_graph_with_goal(env, ph, params):
                                                              axis=1)
 
                 if USE_SAE:
-                    mapped_agent_state_trans_action = tf.concat([mapped_lea_agent_state, ph[trans_d_]['action']], axis=1)
-                    graph[trans_d_]['mapped_action'] = feedforward(in_node=mapped_agent_state_trans_action,
+                    agent_state_trans_action = tf.concat([expert_agent_state, ph[trans_d_]['action']], axis=1)
+                    graph[trans_d_]['mapped_action'] = feedforward(in_node=agent_state_trans_action,
                                                                    is_training=ph[d_]['is_training'],
                                                                    params=params[d_]['actionmap'],
                                                                    scope='actor/' + d_ + '/actionmap',
@@ -216,7 +216,7 @@ def ddpg_graph_with_goal(env, ph, params):
                 # Map expert action to learner action via actionmap
                 next_sa_action = tf.concat([premap_action, ph[d_]['next_state']], axis=1)
                 if USE_SAE:
-                    next_agent_state_premap_action = tf.concat([next_agent_state, premap_action], axis=1)
+                    next_agent_state_premap_action = tf.concat([mapped_agent_state, premap_action], axis=1)
                     graph[d_]['slow_target_action'] = feedforward(in_node=next_agent_state_premap_action,
                                                                   is_training=ph[d_]['is_training'],
                                                                   params=params[d_]['actionmap'],
@@ -565,7 +565,7 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                 #========================== state-action Entangle Loss ========================
                 if USE_SAE:
                     entangle_loss = graph[d_]['entangle_loss']
-                    actor_loss = actor_loss + 1e-3 * entangle_loss
+                    actor_loss = actor_loss + 1e-2 * entangle_loss
                 else:
                     entangle_loss = tf.constant(0)
 
