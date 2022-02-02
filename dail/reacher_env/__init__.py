@@ -33,9 +33,9 @@ register(id='Reacher5DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_5dof:
 register(id='Reacher6DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_6dof:Reacher6DOFEnv', max_episode_steps=80)
 
 # Timestep altered
-register(id='Reacher2DOFSlow-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow:Reacher2DOFSlowEnv', max_episode_steps=150)
-register(id='Reacher2DOFSlowCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow_corner:Reacher2DOFSlowCornerEnv', max_episode_steps=150)
-register(id='Reacher2DOFSlowWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow_wall:Reacher2DOFSlowWallEnv', max_episode_steps=150)
+# register(id='Reacher2DOFSlow-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow:Reacher2DOFSlowEnv', max_episode_steps=150)
+# register(id='Reacher2DOFSlowCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow_corner:Reacher2DOFSlowCornerEnv', max_episode_steps=150)
+# register(id='Reacher2DOFSlowWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow_wall:Reacher2DOFSlowWallEnv', max_episode_steps=150)
 
 # Ant v1 (Original)
 register(id='Antv1_1-v0', entry_point='dail.reacher_env.mujoco.ant:Antv1_1', max_episode_steps=1000)
