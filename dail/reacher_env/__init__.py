@@ -1,4 +1,4 @@
-from dail.reacher_env.registration import register
+from gym.envs.registration import register
 
 # MuJoCO environments
 #register(id='Reacher2DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof:Reacher2DOFEnv', max_episode_steps=60)
@@ -109,6 +109,7 @@ register(id='Reacher2DOFSlowWall-v0', entry_point='dail.reacher_env.mujoco.reach
 
 register(id='Reacher2DOFFastCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_fast:Reacher2DOFFastCornerEnv', max_episode_steps=30)
 register(id='Reacher2DOFFastWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_fast:Reacher2DOFFastWallEnv', max_episode_steps=30)
+
 
 register(id='Reacher2DOFVeryFastCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_very_fast:Reacher2DOFVeryFastCornerEnv', max_episode_steps=15)
 register(id='Reacher2DOFVeryFastWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_very_fast:Reacher2DOFVeryFastWallEnv', max_episode_steps=15)
