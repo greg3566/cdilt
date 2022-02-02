@@ -1,9 +1,9 @@
-from gym.envs.registration import register
+from dail.reacher_env.registration import register
 
 # MuJoCO environments
-register(id='Reacher2DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof:Reacher2DOFEnv', max_episode_steps=60)
-register(id='Reacher2DOFCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_corner:Reacher2DOFCornerEnv', max_episode_steps=60)
-register(id='Reacher2DOFWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_wall:Reacher2DOFWallEnv', max_episode_steps=60)
+#register(id='Reacher2DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof:Reacher2DOFEnv', max_episode_steps=60)
+#register(id='Reacher2DOFCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_corner:Reacher2DOFCornerEnv', max_episode_steps=60)
+#register(id='Reacher2DOFWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_wall:Reacher2DOFWallEnv', max_episode_steps=60)
 
 # dynamics altered
 register(id='Reacher2DOFSto-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_sto:Reacher2DOFStoEnv', max_episode_steps=60)
@@ -12,9 +12,9 @@ register(id='Reacher2DOFActCorner-v0', entry_point='dail.reacher_env.mujoco.reac
 register(id='Reacher2DOFActWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_act_wall:Reacher2DOFActWallEnv', max_episode_steps=60)
 
 # embodiment altered
-register(id='Reacher3DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof:Reacher3DOFEnv', max_episode_steps=60)
-register(id='Reacher3DOFCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof_corner:Reacher3DOFCornerEnv', max_episode_steps=60)
-register(id='Reacher3DOFWall-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof_wall:Reacher3DOFWallEnv', max_episode_steps=60)
+#register(id='Reacher3DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof:Reacher3DOFEnv', max_episode_steps=60)
+#register(id='Reacher3DOFCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof_corner:Reacher3DOFCornerEnv', max_episode_steps=60)
+#register(id='Reacher3DOFWall-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof_wall:Reacher3DOFWallEnv', max_episode_steps=60)
 
 # push environments
 register(id='Reacher2DOFPush-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_push:Reacher2DOFPushEnv', max_episode_steps=500)
@@ -83,9 +83,33 @@ register(id='Antv3_11-v0', entry_point='dail.reacher_env.mujoco.ant_long:Antv3_1
 register(id='Antv3_12-v0', entry_point='dail.reacher_env.mujoco.ant_long:Antv3_12', max_episode_steps=1000)
 
 
+# Ant v4
 register(id='Antv4_alignment-v0', entry_point='dail.reacher_env.mujoco.ant_reacher:Antv4_alignment', max_episode_steps=200)
 register(id='Antv4_target-v0', entry_point='dail.reacher_env.mujoco.ant_reacher:Antv4_target', max_episode_steps=200)
 
+# Ant v5
 register(id='Antv5_alignment-v0', entry_point='dail.reacher_env.mujoco.ant_6legged_reacher:Antv5_alignment', max_episode_steps=200)
 register(id='Antv5_target-v0', entry_point='dail.reacher_env.mujoco.ant_6legged_reacher:Antv5_target', max_episode_steps=200)
+
+# reacher
+register(id='Reacher2DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof:Reacher2DOFEnv', max_episode_steps=60)
+register(id='Reacher2DOFCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof:Reacher2DOFCornerEnv', max_episode_steps=60)
+register(id='Reacher2DOFWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof:Reacher2DOFWallEnv', max_episode_steps=60)
+
+
+register(id='Reacher3DOF-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof:Reacher3DOFEnv', max_episode_steps=60)
+register(id='Reacher3DOFCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof:Reacher3DOFCornerEnv', max_episode_steps=60)
+register(id='Reacher3DOFWall-v0', entry_point='dail.reacher_env.mujoco.reacher_3dof:Reacher3DOFWallEnv', max_episode_steps=60)
+
+register(id='Reacher2DOFVerySlowCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_very_slow:Reacher2DOFVerySlowCornerEnv', max_episode_steps=240)
+register(id='Reacher2DOFVerySlowWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_very_slow:Reacher2DOFVerySlowWallEnv', max_episode_steps=240)
+
+register(id='Reacher2DOFSlowCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow:Reacher2DOFSlowCornerEnv', max_episode_steps=120)
+register(id='Reacher2DOFSlowWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_slow:Reacher2DOFSlowWallEnv', max_episode_steps=120)
+
+register(id='Reacher2DOFFastCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_fast:Reacher2DOFFastCornerEnv', max_episode_steps=30)
+register(id='Reacher2DOFFastWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_fast:Reacher2DOFFastWallEnv', max_episode_steps=30)
+
+register(id='Reacher2DOFVeryFastCorner-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_very_fast:Reacher2DOFVeryFastCornerEnv', max_episode_steps=15)
+register(id='Reacher2DOFVeryFastWall-v0', entry_point='dail.reacher_env.mujoco.reacher_2dof_very_fast:Reacher2DOFVeryFastWallEnv', max_episode_steps=15)
 
