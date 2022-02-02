@@ -33,10 +33,10 @@ def ddpg_graph_with_goal(env, ph, params):
     elif 'Antv5' in env['expert']['name']:
         print("Expert domain is Ant version 5.0 : Ant 6-legged Multigoal")
         EXP_NJOINTS = 0
-    elif 'reacher2DOF' in env['expert']['name']:
+    elif 'reacher2' in env['expert']['name']:
         print("Expert domain is reacher 2DOF")
         EXP_NJOINTS = 0
-    elif 'reacher3DOF' in env['expert']['name']:
+    elif 'reacher3' in env['expert']['name']:
         print("Expert domain is reacher 3DOF")
         EXP_NJOINTS = 0
     else:
@@ -49,10 +49,10 @@ def ddpg_graph_with_goal(env, ph, params):
     elif 'Antv5' in env['learner']['name']:
         print("Learner domain is Ant version 5.0 : Ant 6-legged Multigoal")
         LEA_NJOINTS = 0
-    elif 'reacher2DOF' in env['learner']['name']:
+    elif 'reacher2' in env['learner']['name']:
         print("Learner domain is reacher 2DOF")
         LEA_NJOINTS = 0
-    elif 'reacher3DOF' in env['learner']['name']:
+    elif 'reacher3' in env['learner']['name']:
         print("Learner domain is reacher 3DOF")
         LEA_NJOINTS = 0
 
@@ -509,10 +509,10 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
         elif 'Antv5' in env['expert']['name']:
             print("Expert domain is Ant version 5.0 : Ant 6-legged Multigoal")
             EXP_NJOINTS = 0
-        elif 'reacher2DOF' in env['expert']['name']:
+        elif 'reacher2' in env['expert']['name']:
             print("Expert domain is reacher 2DOF")
             EXP_NJOINTS = 0
-        elif 'reacher3DOF' in env['expert']['name']:
+        elif 'reacher3' in env['expert']['name']:
             print("Expert domain is reacher 3DOF")
             EXP_NJOINTS = 0
         else:
@@ -525,10 +525,10 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
         elif 'Antv5' in env['learner']['name']:
             print("Learner domain is Ant version 5.0 : Ant 6-legged Multigoal")
             LEA_NJOINTS = 0
-        elif 'reacher2DOF' in env['learner']['name']:
+        elif 'reacher2' in env['learner']['name']:
             print("Learner domain is reacher 2DOF")
             LEA_NJOINTS = 0
-        elif 'reacher3DOF' in env['learner']['name']:
+        elif 'reacher3' in env['learner']['name']:
             print("Learner domain is reacher 3DOF")
             LEA_NJOINTS = 0
         else:
