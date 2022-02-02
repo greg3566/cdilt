@@ -4,6 +4,9 @@ from gym.envs.mujoco import mujoco_env
 import math
 import random
 
+import os
+fpath = os.path.dirname(os.path.abspath(__file__))+'/assets/'
+
 def get_dist(A, B):
     return math.sqrt((A[0] - B[0]) ** 2 + (A[1] - B[1]) ** 2)
 
@@ -21,7 +24,7 @@ class Antv5_1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.R = 20.0
         self.target = [self.R * self.ct, self.R * self.st]
 
-        mujoco_env.MujocoEnv.__init__(self, "ant_6legged.xml", 5)
+        mujoco_env.MujocoEnv.__init__(self, fpath+"ant_6legged.xml", 5)
         utils.EzPickle.__init__(self)        
 
     def _step(self, a):
@@ -107,7 +110,7 @@ class Antv5_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         self.R = 20.0
         self.target = [self.R * self.ct, self.R * self.st]
 
-        mujoco_env.MujocoEnv.__init__(self, "ant_6legged.xml", 5)
+        mujoco_env.MujocoEnv.__init__(self, fpath+"ant_6legged.xml", 5)
         utils.EzPickle.__init__(self)        
 
     def _step(self, a):
@@ -189,11 +192,12 @@ class Antv5_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
 
     def set_state_from_obs(self, obs):
-        pos = [obs[2], obs[3]]
+        pos = [self.R*obs[2], self.R*obs[3]]
         qpos = np.concatenate([pos, obs[4:21]], axis=0)
         qvel = obs[21:39]
 
         self.set_state(qpos, qvel)
+        self.target = obs[:2]
 
 class Antv5_target(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
@@ -207,7 +211,7 @@ class Antv5_target(mujoco_env.MujocoEnv, utils.EzPickle):
         self.R = 20.0
         self.target = [self.R * self.ct, self.R * self.st]
 
-        mujoco_env.MujocoEnv.__init__(self, "ant_6legged.xml", 5)
+        mujoco_env.MujocoEnv.__init__(self, fpath+"ant_6legged.xml", 5)
         utils.EzPickle.__init__(self)        
 
     def _step(self, a):
@@ -290,8 +294,10 @@ class Antv5_target(mujoco_env.MujocoEnv, utils.EzPickle):
 
 
     def set_state_from_obs(self, obs):
-        pos = [obs[2], obs[3]]
+        pos = [self.R*obs[2], self.R*obs[3]]
         qpos = np.concatenate([pos, obs[4:21]], axis=0)
         qvel = obs[21:39]
 
         self.set_state(qpos, qvel)
+        self.target = obs[:2]
+

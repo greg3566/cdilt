@@ -203,7 +203,7 @@ class DDPGAgent():
 
                 # choose action based on deterministic policy
                 raw_action, = self.sess.run(self.graph[d_]['action'],
-                                            feed_dict={self.ph[d_]['raw_state']: obs[None],
+                                            feed_dict={self.ph[d_]['state']: obs[None],
                                                        self.ph[d_]['is_training']: False})
 
                 # add temporally-correlated exploration noise to action (using an Ornstein-Uhlenbeck process)
@@ -231,10 +231,10 @@ class DDPGAgent():
 
                     # update the critic and actor params using mean-square value error
                     # and deterministic policy gradient, respectively
-                    feed_dict = {self.ph[d_]['raw_state']: np.asarray([elem[0] for elem in minibatch]),
+                    feed_dict = {self.ph[d_]['state']: np.asarray([elem[0] for elem in minibatch]),
                                  self.ph[d_]['action']: np.asarray([elem[1] for elem in minibatch]),
                                  self.ph[d_]['reward']: np.asarray([elem[2] for elem in minibatch]),
-                                 self.ph[d_]['next_raw_state']: np.asarray([elem[3] for elem in minibatch]),
+                                 self.ph[d_]['next_state']: np.asarray([elem[3] for elem in minibatch]),
                                  self.ph[d_]['is_not_terminal']: np.asarray([elem[4] for elem in minibatch]),
                                  self.ph[d_]['is_training']: True,
                                  self.ph[d_]['train_disc']: 0}
@@ -404,9 +404,9 @@ class DDPGAgent():
             minibatch_l = self.replay_memory['learner'].sample_from_memory(batchsize=self.params['train']['batchsize'])
 
             # update the critic and actor params using mean-square value error and deterministic policy gradient, respectively
-            feed_dict = {self.ph[d_]['raw_state']: np.asarray([elem[0] for elem in minibatch_l]),
+            feed_dict = {self.ph[d_]['state']: np.asarray([elem[0] for elem in minibatch_l]),
                          self.ph[d_]['action']: np.asarray([elem[1] for elem in minibatch_l]),
-                         self.ph[d_]['next_raw_state']: np.asarray([elem[3] for elem in minibatch_l]),
+                         self.ph[d_]['next_state']: np.asarray([elem[3] for elem in minibatch_l]),
                          self.ph[d_]['is_not_terminal']: np.asarray([elem[4] for elem in minibatch_l]),
                          self.ph[d_]['is_training']: True,
                          self.ph[d_]['train_disc']: 0}
@@ -443,11 +443,11 @@ class DDPGAgent():
                 minibatch_l = self.replay_memory['learner'].sample_from_memory(batchsize=self.params['train']['batchsize'])
 
                 # update the critic and actor params using mean-square value error and deterministic policy gradient, respectively
-                feed_dict = {self.ph[d_]['raw_state']: np.asarray([elem[0] for elem in minibatch_l]),
+                feed_dict = {self.ph[d_]['state']: np.asarray([elem[0] for elem in minibatch_l]),
                              self.ph[d_]['action']: np.asarray([elem[1] for elem in minibatch_l]),
                              self.ph[d_]['raw_action']: np.asarray([elem[5] for elem in minibatch_l]),
                              self.ph[d_]['reward']: np.asarray([elem[2] for elem in minibatch_l]),
-                             self.ph[d_]['next_raw_state']: np.asarray([elem[3] for elem in minibatch_l]),
+                             self.ph[d_]['next_state']: np.asarray([elem[3] for elem in minibatch_l]),
                              self.ph[d_]['is_not_terminal']: np.asarray([elem[4] for elem in minibatch_l]),
                              self.ph[d_]['is_training']: True,
                              self.ph[d_]['train_disc']: 0.,
@@ -457,9 +457,9 @@ class DDPGAgent():
 
                 if step % 1 == 0:
                     minibatch_e = self.replay_memory['expert'].sample_from_memory(batchsize=self.params['train']['batchsize'])
-                    feed_dict_expert = {self.ph['expert']['raw_state']: np.asarray([elem[0] for elem in minibatch_e]),
+                    feed_dict_expert = {self.ph['expert']['state']: np.asarray([elem[0] for elem in minibatch_e]),
                                         self.ph['expert']['action']: np.asarray([elem[1] for elem in minibatch_e]),
-                                        self.ph['expert']['next_raw_state']: np.asarray([elem[3] for elem in minibatch_e]),
+                                        self.ph['expert']['next_state']: np.asarray([elem[3] for elem in minibatch_e]),
                                         self.ph['expert']['raw_action']: np.asarray([elem[5] for elem in minibatch_e]),
                                         self.ph['expert']['is_training']: True}
 
@@ -642,7 +642,7 @@ class DDPGAgent():
                     batch_o = exp_o[batch_idx]
                     batch_a = exp_a[batch_idx]
                     fetches = self.sess.run(self.targets['expert']['bc'],
-                                            feed_dict={self.ph['expert']['raw_state']: batch_o,
+                                            feed_dict={self.ph['expert']['state']: batch_o,
                                                        self.ph['expert']['action_tv']: batch_a})
                     epoch_loss.append(fetches['bc_loss'])
 
@@ -805,7 +805,7 @@ class DDPGAgent():
                 act = self.sess.run([self.graph['learner']['mapped_state'],
                                      self.graph['learner']['premap_action'],
                                      self.graph['learner']['action']],
-                                     feed_dict={self.ph['learner']['raw_state']: obs[None],
+                                     feed_dict={self.ph['learner']['state']: obs[None],
                                                 self.ph['learner']['is_training']: False})
 
                 act = act[0]
@@ -864,7 +864,7 @@ class DDPGAgent():
             ep_step = 0
             while ep_step < 60:
                 act = self.sess.run(self.graph[d_]['action'],
-                                    feed_dict={self.ph[d_]['raw_state']: obs[None],
+                                    feed_dict={self.ph[d_]['state']: obs[None],
                                                self.ph[d_]['is_training']: False})
 
                 act = act[0]
@@ -878,7 +878,7 @@ class DDPGAgent():
 
                 # Step with dynamics model
                 next_obs = self.sess.run(self.graph[d_]['model_next_state'],
-                                         feed_dict={self.ph[d_]['raw_state']: obs[None],
+                                         feed_dict={self.ph[d_]['state']: obs[None],
                                                     self.ph[d_]['action']: act[None],
                                                     self.ph[d_]['is_training']: False})
 

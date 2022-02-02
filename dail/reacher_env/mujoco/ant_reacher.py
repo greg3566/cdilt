@@ -4,6 +4,9 @@ from gym.envs.mujoco import mujoco_env
 import math
 import random
 
+import os
+fpath = os.path.dirname(os.path.abspath(__file__))+'/assets/'
+
 def get_dist(A, B):
     return math.sqrt((A[0] - B[0]) ** 2 + (A[1] - B[1]) ** 2)
 
@@ -21,7 +24,7 @@ class Antv4_1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.R = 20.0
         self.target = [self.R * self.ct, self.R * self.st]
 
-        mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
+        mujoco_env.MujocoEnv.__init__(self, fpath+"ant.xml", 5)
         utils.EzPickle.__init__(self)        
 
     def step(self, a):
@@ -106,7 +109,7 @@ class Antv4_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         self.R = 20.0
         self.target = [self.R * self.ct, self.R * self.st]
 
-        mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
+        mujoco_env.MujocoEnv.__init__(self, fpath+"ant.xml", 5)
         utils.EzPickle.__init__(self)        
 
     def _step(self, a):
@@ -131,7 +134,7 @@ class Antv4_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if False and self.steps % 100 == 0:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
             if ra < 1.0:
                 print("[%d] Success!!" %(self.i_episode))
@@ -189,12 +192,12 @@ class Antv4_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
 
     def set_state_from_obs(self, obs):
-        pos = [obs[2], obs[3]]
+        pos = [self.R*obs[2], self.R*obs[3]]
         qpos = np.concatenate([pos, obs[4:17]], axis=0)
         qvel = obs[17:31]
 
         self.set_state(qpos, qvel)
-
+        self.target = obs[:2]
 
 
 class Antv4_target(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -209,7 +212,7 @@ class Antv4_target(mujoco_env.MujocoEnv, utils.EzPickle):
         self.R = 20.0
         self.target = [self.R * self.ct, self.R * self.st]
 
-        mujoco_env.MujocoEnv.__init__(self, "ant.xml", 5)
+        mujoco_env.MujocoEnv.__init__(self, fpath+"ant.xml", 5)
         utils.EzPickle.__init__(self)        
 
     def _step(self, a):
@@ -292,8 +295,10 @@ class Antv4_target(mujoco_env.MujocoEnv, utils.EzPickle):
         self.viewer.cam.distance = self.model.stat.extent * 0.5
 
     def set_state_from_obs(self, obs):
-        pos = [obs[2], obs[3]]
+        pos = [self.R*obs[2], self.R*obs[3]]
         qpos = np.concatenate([pos, obs[4:17]], axis=0)
         qvel = obs[17:31]
 
         self.set_state(qpos, qvel)
+        self.target = obs[:2]
+        

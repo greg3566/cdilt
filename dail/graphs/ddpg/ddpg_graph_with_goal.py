@@ -10,7 +10,7 @@ from .utils import *
 #GOAL_SCALE = EXP_NJOINTS/LEA_NJOINTS
 GOAL_SCALE = 1.
 USE_TM = True
-USE_SAE = False
+USE_SAE = True
 USE_AX = True
 
 def ddpg_graph_with_goal(env, ph, params):
@@ -27,36 +27,26 @@ def ddpg_graph_with_goal(env, ph, params):
     print("NAME!!")
     print(env['expert']['name'])
     # Set the number of joints parameter
-    if 'reacher2' in env['expert']['name']:
-        EXP_NJOINTS = 2
-    elif 'reacher3' in env['expert']['name']:
-        EXP_NJOINTS = 3
-    elif 'ant' in env['expert']['name']:
-        EXP_NJOINTS = 57
-    elif 'Antv1' in env['expert']['name']:
-        print("Expert domain is Ant version 1.0")
-        EXP_NJOINTS = 57
-    elif 'Antv2' in env['expert']['name']:
-        print("Expert domain is Ant version 2.0")
-        EXP_NJOINTS = 79
+    if 'Antv4' in env['expert']['name']:
+        print("Expert domain is Ant version 4.0 : Ant Multigoal")
+        EXP_NJOINTS = 0
+    elif 'Antv5' in env['expert']['name']:
+        print("Expert domain is Ant version 5.0 : Ant 6-legged Multigoal")
+        EXP_NJOINTS = 0
     else:
         print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
+        raise NotImplementedError
 
-    if 'reacher2' in env['learner']['name']:
-        LEA_NJOINTS = 2
-    elif 'reacher3' in env['learner']['name']:
-        LEA_NJOINTS = 3
-    elif 'ant' in env['learner']['name']:
-        print("here!")
-        LEA_NJOINTS = 57
-    elif 'Antv1' in env['learner']['name']:
-        print("Learner domain is Ant version 1.0")
-        LEA_NJOINTS = 57
-    elif 'Antv2' in env['learner']['name']:
-        print("Learner domain is Ant version 2.0")
-        LEA_NJOINTS = 79
+    if 'Antv4' in env['learner']['name']:
+        print("Learner domain is Ant version 4.0 : Ant Multigoal")
+        LEA_NJOINTS = 0
+    elif 'Antv5' in env['learner']['name']:
+        print("Learner domain is Ant version 5.0 : Ant 6-legged Multigoal")
+        LEA_NJOINTS = 0
+
     else:
-        print('[ddpg_graph_with_goal.py] ERROR: unrecognized learner env name {}'.format(env['learner']['name']))
+        print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['learner']['name']))
+        raise NotImplementedError
 
     EXPERT_TYPE = expert_type(env['expert']['name'])
 
@@ -68,13 +58,15 @@ def ddpg_graph_with_goal(env, ph, params):
         # ========= ACTOR ==========
         # Expert policy
         if d_ == 'expert':
-            # TODO:
-            graph[d_]['action'] = feedforward(in_node=ph[d_]['state'],
-                                              is_training=ph[d_]['is_training'],
-                                              params=params[d_]['actor'],
-                                              scope='actor/'+d_, scale=True,
-                                              scale_fn=scale_action,
-                                              scale_params=env[d_]['env'])
+            if EXPERT_TYPE == 'dail':
+                graph[d_]['action'] = feedforward(in_node=ph[d_]['state'],
+                                                  is_training=ph[d_]['is_training'],
+                                                  params=params[d_]['actor'],
+                                                  scope='actor/'+d_, scale=True,
+                                                  scale_fn=scale_action,
+                                                  scale_params=env[d_]['env'])
+            else:
+                graph[d_]['action'] = load_policy_graph(ph[d_]['state'], env['expert']['name'], d_)
 
         # Self policy
         else:
@@ -99,6 +91,7 @@ def ddpg_graph_with_goal(env, ph, params):
                                                        axis=1)
 
                 graph[d_]['mapped_state_end'] = graph[d_]['mapped_state']
+
 
                 if USE_AX:
                     next_agent_state = tf.concat([ph[d_]['next_state'][:, :2 * LEA_NJOINTS],
@@ -129,22 +122,21 @@ def ddpg_graph_with_goal(env, ph, params):
                                                              scale=True, scale_fn=scale_action,
                                                              scale_params=env[trans_d_]['env'])
                 else:
-                    if 'Ant' in env[d_]['name']:
-                        graph[d_]['premap_action'] = load_policy_graph(graph[d_]['mapped_agent_state'], env['expert']['name'])
-                    else:
-                        graph[d_]['premap_action'] = load_policy_graph(graph[d_]['mapped_state_end'], env['expert']['name'])
+                    graph[d_]['premap_action'] = load_policy_graph(graph[d_]['mapped_state_end'], env['expert']['name'], d_)
+                    # if 'Ant' in env[d_]['name']:
+                    #     graph[d_]['premap_action'] = load_policy_graph(graph[d_]['mapped_agent_state'], env['expert']['name'])
 
                 # Map expert action to learner action via actionmap
                 sa_action = tf.concat([graph[d_]['premap_action'], ph[d_]['state']], axis=1)
                 if USE_SAE:
-                    agent_state_premap_action = tf.concat([agent_state, graph[d_]['premap_action']], axis=1)
+                    agent_state_premap_action = tf.concat([graph[d_]['mapped_agent_state'], graph[d_]['premap_action']], axis=1)
                     graph[d_]['action'] = feedforward(in_node=agent_state_premap_action,
                                                       is_training=ph[d_]['is_training'],
                                                       params=params[d_]['actionmap'],
                                                       scope='actor/'+d_+'/actionmap',
                                                       scale=True, scale_fn=scale_action,
                                                       scale_params=env[d_]['env'])
-                    graph[d_]['entangle_loss'] = jacobian_loss(graph[d_]['action'], agent_state)
+                    graph[d_]['entangle_loss'] = jacobian_loss(graph[d_]['action'], graph[d_]['mapped_agent_state'])
                 else:
                     graph[d_]['action'] = feedforward(in_node=graph[d_]['premap_action'],
                                                       is_training=ph[d_]['is_training'],
@@ -172,8 +164,8 @@ def ddpg_graph_with_goal(env, ph, params):
                                                              axis=1)
 
                 if USE_SAE:
-                    mapped_agent_state_trans_action = tf.concat([mapped_lea_agent_state, ph[trans_d_]['action']], axis=1)
-                    graph[trans_d_]['mapped_action'] = feedforward(in_node=mapped_agent_state_trans_action,
+                    agent_state_trans_action = tf.concat([expert_agent_state, ph[trans_d_]['action']], axis=1)
+                    graph[trans_d_]['mapped_action'] = feedforward(in_node=agent_state_trans_action,
                                                                    is_training=ph[d_]['is_training'],
                                                                    params=params[d_]['actionmap'],
                                                                    scope='actor/' + d_ + '/actionmap',
@@ -231,7 +223,7 @@ def ddpg_graph_with_goal(env, ph, params):
                 # Map expert action to learner action via actionmap
                 next_sa_action = tf.concat([premap_action, ph[d_]['next_state']], axis=1)
                 if USE_SAE:
-                    next_agent_state_premap_action = tf.concat([next_agent_state, premap_action], axis=1)
+                    next_agent_state_premap_action = tf.concat([mapped_agent_state, premap_action], axis=1)
                     graph[d_]['slow_target_action'] = feedforward(in_node=next_agent_state_premap_action,
                                                                   is_training=ph[d_]['is_training'],
                                                                   params=params[d_]['actionmap'],
@@ -499,34 +491,25 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
         '''
 
         # Set the number of joints parameter
-        if 'reacher2' in env['expert']['name']:
-            EXP_NJOINTS = 2
-        elif 'reacher3' in env['expert']['name']:
-            EXP_NJOINTS = 3
-        elif 'ant' in env['expert']['name']:
-            print("here!")
-            EXP_NJOINTS = 57
-        elif 'Antv1' in env['expert']['name']:
-            EXP_NJOINTS = 55
-        elif 'Antv2' in env['expert']['name']:
-            EXP_NJOINTS = 79
+        if 'Antv4' in env['expert']['name']:
+            print("Expert domain is Ant version 4.0 : Ant Multigoal")
+            EXP_NJOINTS = 0
+        elif 'Antv5' in env['expert']['name']:
+            print("Expert domain is Ant version 5.0 : Ant 6-legged Multigoal")
+            EXP_NJOINTS = 0
         else:
             print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['expert']['name']))
+            raise NotImplementedError
 
-        if 'reacher2' in env['learner']['name']:
-            LEA_NJOINTS = 2
-        elif 'reacher3' in env['learner']['name']:
-            LEA_NJOINTS = 3
-        elif 'ant' in env['learner']['name']:
-            print("here!")
-            LEA_NJOINTS = 57
-        elif 'Antv1' in env['learner']['name']:
-            LEA_NJOINTS = 55
-        elif 'Antv2' in env['learner']['name']:
-            LEA_NJOINTS = 79
+        if 'Antv4' in env['learner']['name']:
+            print("Learner domain is Ant version 4.0 : Ant Multigoal")
+            LEA_NJOINTS = 0
+        elif 'Antv5' in env['learner']['name']:
+            print("Learner domain is Ant version 5.0 : Ant 6-legged Multigoal")
+            LEA_NJOINTS = 0
         else:
-            print('[ddpg_graph_with_goal.py] ERROR: unrecognized learner env name {}'.format(env['learner']['name']))
-
+            print('[ddpg_graph_with_goal.py] ERROR: unrecognized expert env name {}'.format(env['learner']['name']))
+            raise NotImplementedError
 
         targets = {}
         gamma = params['train']['gamma']
@@ -595,7 +578,7 @@ def get_ddpg_with_goal_targets(env, ph, graph, var_dict, params):
                 #========================== state-action Entangle Loss ========================
                 if USE_SAE:
                     entangle_loss = graph[d_]['entangle_loss']
-                    actor_loss = actor_loss + 1e-3 * entangle_loss
+                    actor_loss = actor_loss + 1e-2 * entangle_loss
                 else:
                     entangle_loss = tf.constant(0)
 

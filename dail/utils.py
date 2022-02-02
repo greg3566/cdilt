@@ -78,7 +78,7 @@ def render_policy(sess, graph, ph, env, domain, num_rollout=20, save_video=True,
             if save_video:
                 frames.append(env[domain]['env'].render(mode='rgb_array'))
 
-            action, = sess.run(graph[domain]['action'], feed_dict={ph[domain]['raw_state']: obs[None],
+            action, = sess.run(graph[domain]['action'], feed_dict={ph[domain]['state']: obs[None],
                                                                    ph[domain]['is_training']: False})
             obs, reward, done, info = env[domain]['env'].step(action)
 
@@ -144,7 +144,6 @@ def render_random(env, domain, num_rollout=20, save_video=True, save_dir='temp')
 
 
 def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=True, vid_name='demonstrations'):
-
     frames = []
     tot_reward = []
     total_obs = []
@@ -168,7 +167,7 @@ def create_dataset(sess, graph, ph, env, save_dir, num_rollout=20, save_video=Tr
 
         while not done:
             # Get next action
-            action, = sess.run(graph['expert']['action'], feed_dict={ph['expert']['raw_state']: obs[None],
+            action, = sess.run(graph['expert']['action'], feed_dict={ph['expert']['state']: obs[None],
                                                                      ph['expert']['is_training']: False})
             ep_obs.append(np.squeeze(obs))
             ep_acs.append(np.squeeze(action))
@@ -236,7 +235,7 @@ def create_hybrid_dataset(sess, graph, ph, env, save_dir, num_transitions=20, sa
                 frames.append(img)
 
             # Get next action
-            raw_action = sess.run(graph['expert']['action'], feed_dict={ph['expert']['raw_state']: obs[None],
+            raw_action = sess.run(graph['expert']['action'], feed_dict={ph['expert']['state']: obs[None],
                                                                         ph['expert']['is_training']: False})
 
             raw_action = raw_action[0]
@@ -395,7 +394,7 @@ def create_hybrid_dataset(sess, graph, ph, env, save_dir, num_transitions=20, sa
 
         while not done:
                 mapped_state_raw, raw_action = sess.run([graph['learner']['mapped_state'], graph['learner']['action']],
-                                                         feed_dict={ph['learner']['raw_state']: obs[None],
+                                                         feed_dict={ph['learner']['state']: obs[None],
                                                                     ph['learner']['is_training']: False})
 
                 raw_action = raw_action[0]

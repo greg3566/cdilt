@@ -21,8 +21,8 @@ def get_ddpg_ph(env):
     ph = {}
     for d_, env_params in env.items():
         ph[d_] = {}
-        ph[d_]['raw_state'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['state_dim']], name=d_+'_state_ph')
-        ph[d_]['next_raw_state'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['state_dim']], name=d_+'_next_state_ph')
+        ph[d_]['state'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['state_dim']], name=d_+'_state_ph')
+        ph[d_]['next_state'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['state_dim']], name=d_+'_next_state_ph')
         ph[d_]['action'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['action_dim']], name=d_+'_action_ph')
         ph[d_]['action_tv'] = tf.placeholder(dtype=tf.float32, shape=[None, env_params['action_dim']], name=d_+'_action_tv_ph')
         ph[d_]['reward'] = tf.placeholder(dtype=tf.float32, shape=[None], name=d_+'_reward_ph')
@@ -33,19 +33,19 @@ def get_ddpg_ph(env):
         ph[d_]['train_disc'] = tf.placeholder(dtype=tf.float32, shape=(), name=d_+'_train_disc_ph') # for stabilizing gan training
         ph[d_]['gen_weight'] = tf.placeholder(dtype=tf.float32, shape=(), name=d_+'_gen_weight_ph') # for stabilizing gan training
 
-        theta_list = [10.0, -10.0, 80.0, 100.0,
-                      -80.0, -100.0, 170.0, -170.0,
-                      45.0, 135.0, -45.0, -135.0]
-        if 'Ant' in env[d_]['name']:
-            s = env[d_]['name'].find('_')
-            idx = int(env[d_]['name'][s + 1:])
-            goal_dir = [[math.cos(theta_list[idx]), math.sin(theta_list[idx])]]
-            goal_dir = 0*ph[d_]['raw_state'][:, :2]+goal_dir  ## TODO: do better
-            ph[d_]['state'] = tf.concat([ph[d_]['raw_state'], goal_dir], axis=1)
-            ph[d_]['next_state'] = tf.concat([ph[d_]['next_raw_state'], goal_dir], axis=1)
-        else:
-            ph[d_]['state'] = ph[d_]['raw_state']
-            ph[d_]['next_state'] = ph[d_]['next_raw_state']
+        # theta_list = [10.0, -10.0, 80.0, 100.0,
+        #               -80.0, -100.0, 170.0, -170.0,
+        #               45.0, 135.0, -45.0, -135.0]
+        # if 'Ant' in env[d_]['name']:
+        #     s = env[d_]['name'].find('_')
+        #     idx = int(env[d_]['name'][s + 1:])
+        #     goal_dir = [[math.cos(theta_list[idx]), math.sin(theta_list[idx])]]
+        #     goal_dir = 0*ph[d_]['raw_state'][:, :2]+goal_dir  ## TODO: do better
+        #     ph[d_]['state'] = tf.concat([ph[d_]['raw_state'], goal_dir], axis=1)
+        #     ph[d_]['next_state'] = tf.concat([ph[d_]['next_raw_state'], goal_dir], axis=1)
+        # else:
+        #     ph[d_]['state'] = ph[d_]['raw_state']
+        #     ph[d_]['next_state'] = ph[d_]['next_raw_state']
 
     return ph
 
