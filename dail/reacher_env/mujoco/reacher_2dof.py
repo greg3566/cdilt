@@ -12,7 +12,7 @@ import os
 class Reacher2DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'reacher_2dof.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof.xml', 2)
         self.viewer = None
 
     def _step(self, a):
@@ -141,13 +141,13 @@ class Reacher2DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def _get_obs(self):
         n_joints = self.model.nq - 2
 
-        theta = self.sim.data.qpos.flat[:n_joints]
+        theta = self.model.data.qpos.flat[:n_joints]
 
         return np.concatenate([
             np.cos(theta),
             np.sin(theta),
-            self.sim.data.qpos.flat[n_joints:], # target position
-            self.sim.data.qvel.flat[:n_joints] # joint velocities
+            self.model.data.qpos.flat[n_joints:], # target position
+            self.model.data.qvel.flat[:n_joints] # joint velocities
         ])
         #self.get_body_com("fingertip") - self.get_body_com("target")
 
@@ -166,6 +166,15 @@ class Reacher2DOFEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         self.set_state(qpos, qvel)
 
+    def _get_viewer(self):
+        if self.viewer is None:
+            size = 128
+            self.viewer = mujoco_py.MjViewer(visible=True, init_width=size, init_height=size, go_fast=False)
+            self.viewer.start()
+            self.viewer.set_model(self.model)
+            self.viewer_setup()
+        return self.viewer
+
 
 class Reacher2DOFCornerEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
@@ -177,10 +186,10 @@ class Reacher2DOFCornerEnv(mujoco_env.MujocoEnv, utils.EzPickle):
                                 [-0.15/scale, -0.15/scale], [-0.15/scale, 0.15/scale], [0.15/scale, -0.15/scale], [0.15/scale, 0.15/scale]]
         self.N = len(self.det_corner_options)
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'reacher_2dof.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof.xml', 2)
         self.viewer = None
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
         vec = self.get_body_com("fingertip")-self.get_body_com("target")
         reward_dist = - np.linalg.norm(vec)
@@ -237,13 +246,13 @@ class Reacher2DOFCornerEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def _get_obs(self):
         n_joints = self.model.nq - 2
 
-        theta = self.sim.data.qpos.flat[:n_joints]
+        theta = self.model.data.qpos.flat[:n_joints]
 
         return np.concatenate([
-            self.sim.data.qpos.flat[n_joints:], # target position
+            self.model.data.qpos.flat[n_joints:], # target position
             np.cos(theta),
             np.sin(theta),
-            self.sim.data.qvel.flat[:n_joints] # joint velocities
+            self.model.data.qvel.flat[:n_joints] # joint velocities
         ])
 
     def set_state_from_obs(self, obs):
@@ -261,6 +270,15 @@ class Reacher2DOFCornerEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         self.set_state(qpos, qvel)
 
+    def _get_viewer(self):
+        if self.viewer is None:
+            size = 128
+            self.viewer = mujoco_py.MjViewer(visible=True, init_width=size, init_height=size, go_fast=False)
+            self.viewer.start()
+            self.viewer.set_model(self.model)
+            self.viewer_setup()
+        return self.viewer
+
 class Reacher2DOFWallEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         self.steps = 0
@@ -271,10 +289,10 @@ class Reacher2DOFWallEnv(mujoco_env.MujocoEnv, utils.EzPickle):
                                 [0.15, 0], [-0.15, 0], [0, 0.15], [0, -0.15]]
         self.N = len(self.det_wall_options)
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'reacher_2dof.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof.xml', 2)
         self.viewer = None
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
         vec = self.get_body_com("fingertip")-self.get_body_com("target")
         reward_dist = - np.linalg.norm(vec)
@@ -331,13 +349,13 @@ class Reacher2DOFWallEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def _get_obs(self):
         n_joints = self.model.nq - 2
 
-        theta = self.sim.data.qpos.flat[:n_joints]
+        theta = self.model.data.qpos.flat[:n_joints]
 
         return np.concatenate([
-            self.sim.data.qpos.flat[n_joints:], # target position
+            self.model.data.qpos.flat[n_joints:], # target position
             np.cos(theta),
             np.sin(theta),
-            self.sim.data.qvel.flat[:n_joints] # joint velocities
+            self.model.data.qvel.flat[:n_joints] # joint velocities
         ])
 
     def set_state_from_obs(self, obs):
@@ -355,3 +373,11 @@ class Reacher2DOFWallEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         self.set_state(qpos, qvel)
 
+    def _get_viewer(self):
+        if self.viewer is None:
+            size = 128
+            self.viewer = mujoco_py.MjViewer(visible=True, init_width=size, init_height=size, go_fast=False)
+            self.viewer.start()
+            self.viewer.set_model(self.model)
+            self.viewer_setup()
+        return self.viewer
