@@ -1,4 +1,4 @@
-<mujoco model="reacher3dof">
+<mujoco model="reacher2dof">
     <compiler angle="radian" inertiafromgeom="true"/>
     <default>
         <joint armature="1" damping="1" limited="true"/>
