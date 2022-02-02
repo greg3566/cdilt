@@ -15,6 +15,8 @@ def load_policy_graph(state, env_name, d_):
     assert expert_type(env_name) != 'dail'
     if 'Antv4' in env_name:
        fpath = 'policy/'+env_name+'/'+env_name+'_s0/tf1_save1700'
+    elif 'Antv5_target' in env_name:
+       fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save2000'
     elif 'Antv5' in env_name:
        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save1400'
     else:
@@ -46,6 +48,8 @@ def load_policy_weights(sess, env_name):
         return 0
     if 'Antv4' in env_name:
         fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save1700'
+    elif 'Antv5_target' in env_name:
+        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save2000'
     elif 'Antv5' in env_name:
         fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save1400'
     else:
