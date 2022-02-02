@@ -159,7 +159,7 @@ def create_env(env_params, seed_dict):
             env_type = 'goal'
 
         elif n_ == 'reacher2_very_slow_wall':
-            curenv = gym.make('Reacher2VerySlowDOFWall-v0')
+            curenv = gym.make('Reacher2DOFVerySlowWall-v0')
             env_type = 'goal'
         elif n_ == 'reacher2_very_slow_corner':
             curenv = gym.make('Reacher2DOFVerySlowCorner-v0')
