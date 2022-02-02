@@ -10,7 +10,7 @@ from .utils import *
 #GOAL_SCALE = EXP_NJOINTS/LEA_NJOINTS
 GOAL_SCALE = 1.
 USE_TM = True
-USE_SAE = True
+USE_SAE = False
 USE_AX = True
 
 def ddpg_graph_with_goal(env, ph, params):

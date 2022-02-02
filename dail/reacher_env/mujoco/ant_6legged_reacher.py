@@ -135,7 +135,7 @@ class Antv5_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() and state[2] >= 0.2 and state[2] <= 1.0
         done = not notdone
         ob = self._get_obs()
-        if self.steps % 100 == 0:
+        if False and self.steps % 100 == 0:
             print("[%d] %.2f %.2f %.2f" %(self.i_episode, self.get_body_com("torso")[0], self.get_body_com("torso")[1], math.atan2(self.get_body_com("torso")[1], self.get_body_com("torso")[0])))
             if ra < 1.0:
                 print("[%d] Success!!" %(self.i_episode))
@@ -203,7 +203,7 @@ class Antv5_target(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         self.i_episode = 0
         self.steps = 0
-        self.theta_list = [45. -45, 135, -135]
+        self.theta_list = [45, -45, 135, -135]
         self.N = len(self.theta_list)
         self.theta = 0.0 / 180.0 * math.pi
         self.st = math.sin(self.theta)
