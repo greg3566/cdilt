@@ -19,7 +19,7 @@ class Reacher2DOFVerySlowCornerEnv(mujoco_env.MujocoEnv, utils.EzPickle):
                                 [-0.15/scale, -0.15/scale], [-0.15/scale, 0.15/scale], [0.15/scale, -0.15/scale], [0.15/scale, 0.15/scale]]
         self.N = len(self.det_corner_options)
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'reacher_2dof_very_slow.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof_very_slow.xml', 2)
         self.viewer = None
 
     def _step(self, a):
@@ -122,7 +122,7 @@ class Reacher2DOFVerySlowWallEnv(mujoco_env.MujocoEnv, utils.EzPickle):
                                 [0.15, 0], [-0.15, 0], [0, 0.15], [0, -0.15]]
         self.N = len(self.det_wall_options)
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'reacher_2dof_very_slow.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof_very_slow.xml', 2)
         self.viewer = None
 
     def _step(self, a):
