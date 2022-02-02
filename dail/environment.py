@@ -60,15 +60,15 @@ def create_env(env_params, seed_dict):
             curenv = gym.make('SnakeSeven-v1')
             env_type = 'nogoal'
 
-        elif n_ == 'reacher2':
-            curenv = gym.make('Reacher2DOF-v0')
-            env_type = 'goal'
-        elif n_ == 'reacher2_corner':
-            curenv = gym.make('Reacher2DOFCorner-v0')
-            env_type = 'goal'
-        elif n_ == 'reacher2_wall':
-            curenv = gym.make('Reacher2DOFWall-v0')
-            env_type = 'goal'
+        # elif n_ == 'reacher2':
+        #     curenv = gym.make('Reacher2DOF-v0')
+        #     env_type = 'goal'
+        # elif n_ == 'reacher2_corner':
+        #     curenv = gym.make('Reacher2DOFCorner-v0')
+        #     env_type = 'goal'
+        # elif n_ == 'reacher2_wall':
+        #     curenv = gym.make('Reacher2DOFWall-v0')
+        #     env_type = 'goal'
 
         # Dynamics
         elif n_ == 'reacher2_act':
@@ -82,15 +82,15 @@ def create_env(env_params, seed_dict):
             env_type = 'goal'
 
         # Embodiment
-        elif n_ == 'reacher3':
-            curenv = gym.make('Reacher3DOF-v0')
-            env_type = 'goal'
-        elif n_ == 'reacher3_wall':
-            curenv = gym.make('Reacher3DOFWall-v0')
-            env_type = 'goal'
-        elif n_ == 'reacher3_corner':
-            curenv = gym.make('Reacher3DOFCorner-v0')
-            env_type = 'goal'
+        # elif n_ == 'reacher3':
+        #     curenv = gym.make('Reacher3DOF-v0')
+        #     env_type = 'goal'
+        # elif n_ == 'reacher3_wall':
+        #     curenv = gym.make('Reacher3DOFWall-v0')
+        #     env_type = 'goal'
+        # elif n_ == 'reacher3_corner':
+        #     curenv = gym.make('Reacher3DOFCorner-v0')
+        #     env_type = 'goal'
 
         # Push
         elif n_ == 'reacher2_push':
@@ -126,15 +126,15 @@ def create_env(env_params, seed_dict):
             env_type = 'goal'
 
         # Timestep
-        elif n_ == 'reacher2_slow':
-            curenv = gym.make('Reacher2DOFSlow-v0')
-            env_type = 'goal'
-        elif n_ == 'reacher2_slow_wall':
-            curenv = gym.make('Reacher2DOFSlowWall-v0')
-            env_type = 'goal'
-        elif n_ == 'reacher2_slow_corner':
-            curenv = gym.make('Reacher2DOFSlowCorner-v0')
-            env_type = 'goal'
+        # elif n_ == 'reacher2_slow':
+        #     curenv = gym.make('Reacher2DOFSlow-v0')
+        #     env_type = 'goal'
+        # elif n_ == 'reacher2_slow_wall':
+        #     curenv = gym.make('Reacher2DOFSlowWall-v0')
+        #     env_type = 'goal'
+        # elif n_ == 'reacher2_slow_corner':
+        #     curenv = gym.make('Reacher2DOFSlowCorner-v0')
+        #     env_type = 'goal'
 
         # Ant
         elif n_ == 'Antv4_alignment':
@@ -149,6 +149,52 @@ def create_env(env_params, seed_dict):
         elif n_ == 'Antv5_target':
             curenv = gym.make('Antv5_target-v0')
             env_type = 'goal'
+
+
+        elif n_ == 'reacher3_wall':
+            curenv = gym.make('Reacher3DOFWall-v0')
+            env_type = 'goal'
+        elif n_ == 'reacher3_corner':
+            curenv = gym.make('Reacher3DOFCorner-v0')
+            env_type = 'goal'
+
+        elif n_ == 'reacher2_very_slow_wall':
+            curenv = gym.make('Reacher2VerySlowDOFWall-v0')
+            env_type = 'goal'
+        elif n_ == 'reacher2_very_slow_corner':
+            curenv = gym.make('Reacher2DOFVerySlowCorner-v0')
+            env_type = 'goal'
+
+        elif n_ == 'reacher2_slow_wall':
+            curenv = gym.make('Reacher2DOFSlowWall-v0')
+            env_type = 'goal'
+        elif n_ == 'reacher2_slow_corner':
+            curenv = gym.make('Reacher2DOFSlowCorner-v0')
+            env_type = 'goal'
+
+        elif n_ == 'reacher2_wall':
+            curenv = gym.make('Reacher2DOFWall-v0')
+            env_type = 'goal'
+        elif n_ == 'reacher2_corner':
+            curenv = gym.make('Reacher2DOFCorner-v0')
+            env_type = 'goal'
+
+        elif n_ == 'reacher2_fast_wall':
+            curenv = gym.make('Reacher2DOFFastWall-v0')
+            env_type = 'goal'
+        elif n_ == 'reacher2_fast_corner':
+            curenv = gym.make('Reacher2DOFFastCorner-v0')
+            env_type = 'goal'
+
+        elif n_ == 'reacher2_very_fast_wall':
+            curenv = gym.make('Reacher2DOFVeryFastWall-v0')
+            env_type = 'goal'
+        elif n_ == 'reacher2_very_fast_corner':
+            curenv = gym.make('Reacher2DOFVeryFastCorner-v0')
+            env_type = 'goal'
+
+        
+
         else:
             print("Unrecognized environment name: {}".format(n_))
             exit(1)
