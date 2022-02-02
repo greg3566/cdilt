@@ -12,6 +12,7 @@ GOAL_SCALE = 1.
 USE_TM = True
 USE_SAE = False
 USE_AX = True
+USE_UD = True
 
 def ddpg_graph_with_goal(env, ph, params):
     '''
@@ -394,25 +395,51 @@ def ddpg_graph_with_goal(env, ph, params):
                         graph[d_]['mapped_next_agent_state'] - graph[d_]['mapped_agent_state'])
             else:
                 mapped_agent_next_state = graph[d_]['mapped_next_agent_state']
-            mapped_next_state = tf.concat([mapped_agent_next_state[:, :2 * EXP_NJOINTS],
-                                           goal_state,
-                                           mapped_agent_next_state[:, 2 * EXP_NJOINTS:]],
-                                          axis=1)
-            sas_fake = tf.concat([graph[d_]['mapped_state_end'],
-                                  ph[d_]['action'],
-                                  mapped_next_state], axis=1)
-            sas_real = tf.concat([ph[trans_d_]['state'],
-                                  graph[trans_d_]['mapped_action'],
-                                  ph[trans_d_]['next_state']],
-                                 axis=1)
+            if USE_UD:
+                sas_fake = tf.concat([graph[d_]['mapped_agent_state'],
+                                      ph[d_]['action'],
+                                      mapped_agent_next_state], axis=1)
+                trans_agent_state = tf.concat([ph[trans_d_]['state'][:, :2 * EXP_NJOINTS],
+                                               ph[trans_d_]['state'][:, 2 * EXP_NJOINTS + 2:]], axis=1)
+                trans_next_agent_state = tf.concat([ph[trans_d_]['next_state'][:, :2 * EXP_NJOINTS],
+                                               ph[trans_d_]['next_state'][:, 2 * EXP_NJOINTS + 2:]], axis=1)
+                sas_real = tf.concat([trans_agent_state,
+                                      graph[trans_d_]['mapped_action'],
+                                      trans_next_agent_state],
+                                     axis=1)
+            else:
+                mapped_next_state = tf.concat([mapped_agent_next_state[:, :2 * EXP_NJOINTS],
+                                               goal_state,
+                                               mapped_agent_next_state[:, 2 * EXP_NJOINTS:]],
+                                              axis=1)
+                sas_fake = tf.concat([graph[d_]['mapped_state_end'],
+                                      ph[d_]['action'],
+                                      mapped_next_state], axis=1)
+                sas_real = tf.concat([ph[trans_d_]['state'],
+                                      graph[trans_d_]['mapped_action'],
+                                      ph[trans_d_]['next_state']],
+                                     axis=1)
         else:
-            sas_fake = tf.concat([graph[d_]['mapped_state_end'],
-                                  graph[d_]['premap_action'],
-                                  mapped_next_state], axis=1)
-            sas_real = tf.concat([ph[trans_d_]['state'],
-                                  ph[trans_d_]['action'],
-                                  ph[trans_d_]['next_state']],
-                                 axis=1)
+            if USE_UD:
+                sas_fake = tf.concat([graph[d_]['mapped_agent_state'],
+                                      graph[d_]['premap_action'],
+                                      mapped_agent_next_state], axis=1)
+                trans_agent_state = tf.concat([ph[trans_d_]['state'][:, :2 * EXP_NJOINTS],
+                                               ph[trans_d_]['state'][:, 2 * EXP_NJOINTS + 2:]], axis=1)
+                trans_next_agent_state = tf.concat([ph[trans_d_]['next_state'][:, :2 * EXP_NJOINTS],
+                                                    ph[trans_d_]['next_state'][:, 2 * EXP_NJOINTS + 2:]], axis=1)
+                sas_real = tf.concat([trans_agent_state,
+                                      ph[trans_d_]['action'],
+                                      trans_next_agent_state],
+                                     axis=1)
+            else:
+                sas_fake = tf.concat([graph[d_]['mapped_state_end'],
+                                      graph[d_]['premap_action'],
+                                      mapped_next_state], axis=1)
+                sas_real = tf.concat([ph[trans_d_]['state'],
+                                      ph[trans_d_]['action'],
+                                      ph[trans_d_]['next_state']],
+                                     axis=1)
 
         graph[d_]['fake_prob'] = feedforward(in_node=sas_fake,
                                              is_training=ph[d_]['is_training'],
