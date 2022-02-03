@@ -1,14 +1,14 @@
 {
     "ac_kwargs":	{},
+    "act_noise":	0.1,
     "actor_critic":	"mlp_actor_critic",
-    "clip_ratio":	0.2,
-    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f8ead347170>",
+    "batch_size":	100,
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f408a22f170>",
     "epochs":	2000,
     "exp_name":	"reacher2_wall",
     "gamma":	0.99,
-    "lam":	0.97,
     "logger":	{
-        "<spinup.utils.logx.EpochLogger object at 0x7f8e60cbe910>":	{
+        "<spinup.utils.logx.EpochLogger object at 0x7f4036c530d0>":	{
             "epoch_dict":	{},
             "exp_name":	"reacher2_wall",
             "first_row":	true,
@@ -27,12 +27,15 @@
         "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/reacher2_wall/reacher2_wall_s0"
     },
     "max_ep_len":	1000,
-    "pi_lr":	0.0003,
+    "num_test_episodes":	10,
+    "pi_lr":	0.001,
+    "polyak":	0.995,
+    "q_lr":	0.001,
+    "replay_size":	1000000,
     "save_freq":	10,
     "seed":	0,
+    "start_steps":	10000,
     "steps_per_epoch":	4000,
-    "target_kl":	0.01,
-    "train_pi_iters":	80,
-    "train_v_iters":	80,
-    "vf_lr":	0.001
+    "update_after":	1000,
+    "update_every":	50
 }

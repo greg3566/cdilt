@@ -3,20 +3,20 @@
     "actor_critic":	"mlp_actor_critic",
     "alpha":	0.2,
     "batch_size":	100,
-    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7fa51a0e9170>",
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f179bda9170>",
     "epochs":	2000,
     "exp_name":	"Antv5_target",
     "gamma":	0.99,
     "logger":	{
-        "<spinup.utils.logx.EpochLogger object at 0x7fa4c8b0d250>":	{
+        "<spinup.utils.logx.EpochLogger object at 0x7f16ea847350>":	{
             "epoch_dict":	{},
             "exp_name":	"Antv5_target",
             "first_row":	true,
             "log_current_row":	{},
             "log_headers":	[],
-            "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/Antv5_target/Antv5_target_s0",
+            "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/Antv5_target/Antv5_target_s1",
             "output_file":	{
-                "<_io.TextIOWrapper name='/home/jeongwoooh/CDIL_torch/spinningup/data/Antv5_target/Antv5_target_s0/progress.txt' mode='w' encoding='UTF-8'>":	{
+                "<_io.TextIOWrapper name='/home/jeongwoooh/CDIL_torch/spinningup/data/Antv5_target/Antv5_target_s1/progress.txt' mode='w' encoding='UTF-8'>":	{
                     "mode":	"w"
                 }
             }
@@ -24,7 +24,7 @@
     },
     "logger_kwargs":	{
         "exp_name":	"Antv5_target",
-        "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/Antv5_target/Antv5_target_s0"
+        "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/Antv5_target/Antv5_target_s1"
     },
     "lr":	0.001,
     "max_ep_len":	1000,
@@ -32,7 +32,7 @@
     "polyak":	0.995,
     "replay_size":	1000000,
     "save_freq":	10,
-    "seed":	0,
+    "seed":	1,
     "start_steps":	10000,
     "steps_per_epoch":	4000,
     "update_after":	1000,
