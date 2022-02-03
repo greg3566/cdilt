@@ -268,6 +268,9 @@ class DDPGAgent():
             if mean_reward > best_reward:
                 best_reward = mean_reward
                 self.saver_expert.save(self.sess, self.save_expert_dir+'/expert.ckpt')
+            # save model periodically
+            if ep%10000 == 0:
+                self.saver_expert.save(self.sess, self.save_expert_dir + '/' + str(ep) + '/expert.ckpt')
 
 
             # Print out episode evaluation metrics
