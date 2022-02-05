@@ -194,4 +194,4 @@ in graphs/ddpg/ddpg_graph_with_goal.py :
 3. USE_AX = whether use (sy ax sy) for GAN
 4. USE_UD = whether use unified dynamics (no goal in state for GAN)
 
-in agents/ddpg.py : comment "break # TODO: args" iff USE_AX
+in agents/ddpg.py : uncomment "break # TODO: args" iff USE_AX
