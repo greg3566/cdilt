@@ -186,3 +186,12 @@ or
 bash script/alignment_{}.sh
 
 6. Zeroshot evaluation
+
+## change algorithm
+in graphs/ddpg/ddpg_graph_with_goal.py :
+1. USE_TM : whether use time multiplier
+2. USE_SAE = whether use state for action mapping
+3. USE_AX = whether use (sy ax sy) for GAN
+4. USE_UD = whether use unified dynamics (no goal in state for GAN)
+
+in agents/ddpg.py : comment "break # TODO: args" iff USE_AX
