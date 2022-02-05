@@ -1,5 +1,6 @@
 # cdilt
 Cross-Domain Imitation Learning with Time-step multiplier
+https://www.notion.so/CDIL-3f91f7e5aa10466a9d958b660cae3486
 
 ## TODO
 1. Implement time-step multiplier (done / should be parmeterized)
