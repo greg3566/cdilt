@@ -60,15 +60,8 @@ class Reacher2DOFSlowCornerEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         second_bias = self.np_random.uniform(low=bias2_low, high=bias2_high, size=1)
         qpos = self.np_random.uniform(low=-0.1, high=0.1, size=self.model.nq) + self.init_qpos
         qpos[:1] = first_bias
-        while True:
-            # Corner deterministic
-            
-            
-            chosen_goal = self.det_corner_options[random.randrange(self.N)]
-            self.goal = np.array(chosen_goal)
-#           
-            if np.linalg.norm(self.goal) < max_reachable_len and np.linalg.norm(self.goal) > min_reachable_len:
-                break
+        chosen_goal = self.det_corner_options[random.randrange(self.N)]
+        self.goal = np.array(chosen_goal)
         print("[%d] goal: (%.2f, %.2f)" %(self.i_episode, self.goal[0], self.goal[1]))
         qpos[-2:] = self.goal
         qvel = self.init_qvel + self.np_random.uniform(low=-.005, high=.005, size=self.model.nv)
@@ -164,14 +157,8 @@ class Reacher2DOFSlowWallEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         qpos = self.np_random.uniform(low=-0.1, high=0.1, size=self.model.nq) + self.init_qpos
         qpos[:1] = first_bias
         while True:
-            # Corner deterministic
-            
-            
-            chosen_goal = self.det_wall_options[random.randrange(self.N)]
-            self.goal = np.array(chosen_goal)
-#           
-            if np.linalg.norm(self.goal) < max_reachable_len and np.linalg.norm(self.goal) > min_reachable_len:
-                break
+        chosen_goal = self.det_wall_options[random.randrange(self.N)]
+        self.goal = np.array(chosen_goal)
         print("[%d] goal: (%.2f, %.2f)" %(self.i_episode, self.goal[0], self.goal[1]))
         qpos[-2:] = self.goal
         qvel = self.init_qvel + self.np_random.uniform(low=-.005, high=.005, size=self.model.nv)
