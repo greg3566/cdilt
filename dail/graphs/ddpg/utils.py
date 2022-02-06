@@ -1,5 +1,7 @@
 import tensorflow as tf
 from tensorflow.python.ops.parallel_for.gradients import jacobian, batch_jacobian
+import joblib
+from os import path as osp
 
 def jacobian_loss(Y,X):
     J = batch_jacobian(Y,X,use_pfor=False)
@@ -7,23 +9,29 @@ def jacobian_loss(Y,X):
 
 def expert_type(env_name):
     if 'reacher' in env_name:
-        return 'dail'
+        return 'ddpg'
     elif 'Ant' in env_name:
         return 'sac'
+    else:
+        raise NotImplementedError
 
 def load_policy_graph(state, env_name, d_):
-    assert expert_type(env_name) != 'dail'
+    type = expert_type(env_name)
+    assert type != 'dail'
     if 'Antv4' in env_name:
        fpath = 'policy/'+env_name+'/'+env_name+'_s0/tf1_save1700'
     elif 'Antv5_target' in env_name:
        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save2000'
-    elif 'Antv5' in env_name:
+    elif 'Antv5_alignment' in env_name:
        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save1400'
+    elif 'reacher' in env_name:
+       fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save200'
     else:
         raise NotImplementedError
-    # model_info = joblib.load(osp.join(fpath, 'model_info.pkl'))
+    model_info = joblib.load(osp.join(fpath, 'model_info.pkl'))
     # print(model_info)
-    # {'inputs': {'x': 'Placeholder:0', 'a': 'Placeholder_1:0'}, 'outputs': {'mu': 'main/mul:0', 'q2': 'main/q2/Squeeze:0', 'q1': 'main/q1/Squeeze:0', 'pi': 'main/mul_1:0'}}
+    # ddpg : {'outputs': {'q': 'main/q/Squeeze:0', 'pi': 'main/pi/mul:0'}, 'inputs': {'a': 'Placeholder_1:0', 'x': 'Placeholder:0'}}
+    # sac : {'inputs': {'x': 'Placeholder:0', 'a': 'Placeholder_1:0'}, 'outputs': {'mu': 'main/mul:0', 'q2': 'main/q2/Squeeze:0', 'q1': 'main/q1/Squeeze:0', 'pi': 'main/mul_1:0'}}
     graph = tf.Graph()
     scope = 'actor/' + d_ + '/loaded_expert'
     with tf.Session(graph=graph) as sess:
@@ -37,11 +45,19 @@ def load_policy_graph(state, env_name, d_):
         vars = tf.global_variables()
         saver = tf.train.Saver(vars)
         saver.save(sess, fpath+'/weights_'+d_+'.ckpt')
-    tf.graph_util.import_graph_def(graphDef, name='', input_map={scope+"/Placeholder:0": state})
+    if type == 'ddpg' or type == 'sac':
+        tf.graph_util.import_graph_def(graphDef, name='', input_map={scope + "/Placeholder:0": state})
+    else:
+        raise NotImplementedError
     graph = tf.get_default_graph()
     for v in vars:
         graph.add_to_collection('loaded_variables', graph.get_tensor_by_name(v.name))
-    return graph.get_tensor_by_name(scope+'/main/mul:0')
+    if type == 'ddpg':
+        return graph.get_tensor_by_name(scope + '/main/pi/mul:0')
+    elif type == 'sac':
+        return graph.get_tensor_by_name(scope + '/main/mul:0')
+    else:
+        raise NotImplementedError
 
 def load_policy_weights(sess, env_name):
     if expert_type(env_name) == 'dail':
@@ -52,6 +68,8 @@ def load_policy_weights(sess, env_name):
         fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save2000'
     elif 'Antv5' in env_name:
         fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save1400'
+    elif 'reacher' in env_name:
+        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save200'
     else:
         raise NotImplementedError
     graph = tf.get_default_graph()

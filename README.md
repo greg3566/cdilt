@@ -1,6 +1,8 @@
 # cdilt
 Cross-Domain Imitation Learning with Time-step multiplier
 
+https://www.notion.so/CDIL-3f91f7e5aa10466a9d958b660cae3486
+
 ## TODO
 1. Implement time-step multiplier (done / should be parmeterized)
 2. Implement state-action entanglement (maybe done / should be parmeterized)
@@ -147,3 +149,49 @@ python -m spinup.run sac_tf1 --env Antv3_10-v0 --exp_name Antv3_10 --epochs 1000
 python -m spinup.run sac_tf1 --env Antv3_11-v0 --exp_name Antv3_11 --epochs 1000 --save_freq 10
 python -m spinup.run sac_tf1 --env Antv3_12-v0 --exp_name Antv3_12 --epochs 1000 --save_freq 10
 '''
+
+## Train pipeline
+1. Train expert policy
+2. Collect demo
+python train.py --load_expert_dir {1} --save_dataset_dir {2} --edomain {env_name} --ldomain {env_name} --gpu {gpu_num} --agent_type create_demo --algo ddpg --n_demo 1000 --seed {seed_num}
+
+> {1} : {expert policy direction} if {policy is from dail} else None
+> 
+> {2} : directory to save demo. usally expert_data/demo/{env_name}.npz
+
+4. Merge demos
+python dataset_merger.py --expert_dataset_dir {1} --learner_dataset_dir {2} --save_dataset_dir {3}
+
+> {1} : directory of expert domain demo. usally expert_data/demo/{expert_env_name}.npz
+> 
+> {2} : directory of learner domain demo. usally expert_data/demo/{learner_env_name}.npz
+>
+> {3} : directory to save merged demo. usually expert_data/taskset/{taskset_name}.pickle
+
+5. Train gama
+python train.py --algo ddpg --agent_type gama --load_dataset_dir {1} --load_expert_dir {2} --save_learner_dir {3} --logdir {4} --edomain {expert_env_name} --ldomain {learner_env_name} --seed {seed_num} --gpu {gpu_num}
+
+> 여러 시드를 학습할 때 시간 간격을 두고 켜야 resource temporarily unavailable이 안 일어남!
+>
+> {1} : directory of merged demo. expert_data/taskset/{taskset_name}.pickle
+> 
+> {2} : {expert policy direction} if {policy is from dail} else None
+> 
+> {3} : directory to save alignment. usally ./saved_alignments/{taskset_name}/seed_{seed_num}
+>
+> {4} : directory to save log.usually usally ./logs/{taskset_name}/seed_{seed_num}
+
+or
+
+bash script/alignment_{}.sh
+
+6. Zeroshot evaluation
+
+## change algorithm
+in graphs/ddpg/ddpg_graph_with_goal.py :
+1. USE_TM : whether use time multiplier
+2. USE_SAE = whether use state for action mapping
+3. USE_AX = whether use (sy ax sy) for GAN
+4. USE_UD = whether use unified dynamics (no goal in state for GAN)
+
+in agents/ddpg.py : uncomment "break # TODO: args" iff USE_AX
