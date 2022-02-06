@@ -3,12 +3,12 @@
     "act_noise":	0.1,
     "actor_critic":	"mlp_actor_critic",
     "batch_size":	100,
-    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f95eb879050>",
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f4115efc050>",
     "epochs":	2000,
     "exp_name":	"reacher2_slow_wall",
     "gamma":	0.99,
     "logger":	{
-        "<spinup.utils.logx.EpochLogger object at 0x7f959829c110>":	{
+        "<spinup.utils.logx.EpochLogger object at 0x7f4051d39a10>":	{
             "epoch_dict":	{},
             "exp_name":	"reacher2_slow_wall",
             "first_row":	true,
