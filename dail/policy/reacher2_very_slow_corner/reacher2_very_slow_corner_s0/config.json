@@ -3,20 +3,20 @@
     "act_noise":	0.1,
     "actor_critic":	"mlp_actor_critic",
     "batch_size":	100,
-    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f0584340170>",
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7fdd92770170>",
     "epochs":	2000,
     "exp_name":	"reacher2_very_slow_corner",
     "gamma":	0.99,
     "logger":	{
-        "<spinup.utils.logx.EpochLogger object at 0x7f0584226250>":	{
+        "<spinup.utils.logx.EpochLogger object at 0x7fdd468f6950>":	{
             "epoch_dict":	{},
             "exp_name":	"reacher2_very_slow_corner",
             "first_row":	true,
             "log_current_row":	{},
             "log_headers":	[],
-            "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/reacher2_very_slow_corner/reacher2_very_slow_corner_s0",
+            "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/reacher2_very_slow_corner/reacher2_very_slow_corner_s1",
             "output_file":	{
-                "<_io.TextIOWrapper name='/home/jeongwoooh/CDIL_torch/spinningup/data/reacher2_very_slow_corner/reacher2_very_slow_corner_s0/progress.txt' mode='w' encoding='UTF-8'>":	{
+                "<_io.TextIOWrapper name='/home/jeongwoooh/CDIL_torch/spinningup/data/reacher2_very_slow_corner/reacher2_very_slow_corner_s1/progress.txt' mode='w' encoding='UTF-8'>":	{
                     "mode":	"w"
                 }
             }
@@ -24,7 +24,7 @@
     },
     "logger_kwargs":	{
         "exp_name":	"reacher2_very_slow_corner",
-        "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/reacher2_very_slow_corner/reacher2_very_slow_corner_s0"
+        "output_dir":	"/home/jeongwoooh/CDIL_torch/spinningup/data/reacher2_very_slow_corner/reacher2_very_slow_corner_s1"
     },
     "max_ep_len":	1000,
     "num_test_episodes":	10,
@@ -33,7 +33,7 @@
     "q_lr":	0.001,
     "replay_size":	1000000,
     "save_freq":	10,
-    "seed":	0,
+    "seed":	1,
     "start_steps":	10000,
     "steps_per_epoch":	4000,
     "update_after":	1000,
