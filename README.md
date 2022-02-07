@@ -181,13 +181,15 @@ python train.py --load_expert_dir None --save_dataset_dir expert_data/demo/0207/
 ## Train pipeline
 1. Train expert policy
 2. Collect demo
+
 python train.py --load_expert_dir {1} --save_dataset_dir {2} --edomain {env_name} --ldomain {env_name} --gpu {gpu_num} --agent_type create_demo --algo ddpg --n_demo 1000 --seed {seed_num}
 
 > {1} : {expert policy direction} if {policy is from dail} else None
 > 
 > {2} : directory to save demo. usally expert_data/demo/{env_name}.npz
 
-4. Merge demos
+3. Merge demos
+
 python dataset_merger.py --expert_dataset_dir {1} --learner_dataset_dir {2} --save_dataset_dir {3}
 
 > {1} : directory of expert domain demo. usally expert_data/demo/{expert_env_name}.npz
@@ -196,7 +198,8 @@ python dataset_merger.py --expert_dataset_dir {1} --learner_dataset_dir {2} --sa
 >
 > {3} : directory to save merged demo. usually expert_data/taskset/{taskset_name}.pickle
 
-5. Train gama
+4. Train gama
+
 python train.py --algo ddpg --agent_type gama --load_dataset_dir {1} --load_expert_dir {2} --save_learner_dir {3} --logdir {4} --edomain {expert_env_name} --ldomain {learner_env_name} --seed {seed_num} --gpu {gpu_num}
 
 > 여러 시드를 학습할 때 시간 간격을 두고 켜야 resource temporarily unavailable이 안 일어남!
@@ -213,7 +216,7 @@ or
 
 bash script/alignment_{}.sh
 
-6. Zeroshot evaluation
+5. Zeroshot evaluation
 
 ## change algorithm
 in graphs/ddpg/ddpg_graph_with_goal.py :
