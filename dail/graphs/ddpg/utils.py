@@ -19,13 +19,13 @@ def load_policy_graph(state, env_name, d_):
     type = expert_type(env_name)
     assert type != 'dail'
     if 'Antv4' in env_name:
-       fpath = 'policy/'+env_name+'/'+env_name+'_s0/tf1_save1700'
+       fpath = 'policy/'+env_name+'/'+env_name+'_s0/tf1_save'
     elif 'Antv5_target' in env_name:
-       fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save2000'
+       fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save'
     elif 'Antv5_alignment' in env_name:
-       fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save1400'
+       fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save'
     elif 'reacher' in env_name:
-       fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save200'
+       fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save'
     else:
         raise NotImplementedError
     model_info = joblib.load(osp.join(fpath, 'model_info.pkl'))
@@ -63,13 +63,13 @@ def load_policy_weights(sess, env_name):
     if expert_type(env_name) == 'dail':
         return 0
     if 'Antv4' in env_name:
-        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save1700'
+        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save'
     elif 'Antv5_target' in env_name:
-        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save2000'
+        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save'
     elif 'Antv5' in env_name:
-        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save1400'
+        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save'
     elif 'reacher' in env_name:
-        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save200'
+        fpath = 'policy/' + env_name + '/' + env_name + '_s0/tf1_save'
     else:
         raise NotImplementedError
     graph = tf.get_default_graph()
