@@ -4,7 +4,10 @@ cached_videos/
 target_demo*
 logs/temp/
 expert_data/taskset
-expert_data/demo/ant*
+expert_data/demo/**/*ant*
+expert_data/demo/**/*A*
+policy/**/weights_*.ckpt*
+policy/**/checkpoint
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

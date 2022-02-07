@@ -14,7 +14,7 @@ parser.add_argument('--save_dataset_dir', default='./saved_dataset/temp', type=s
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    num_transitions = int(1e5)
+    num_transitions = int(1e7)
     ## expert domain
     npzfile = np.load(args.expert_dataset_dir, allow_pickle=True)
     obs = npzfile['obs']
@@ -39,7 +39,6 @@ if __name__ == '__main__':
     print("Avg Reward: {}".format(np.mean(tot_reward)))
 
     ## learner domain
-    num_transitions = int(num_transitions*2.5)
     npzfile = np.load(args.learner_dataset_dir, allow_pickle=True)
     obs = npzfile['obs']
     acs = npzfile['acs']

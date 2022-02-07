@@ -12,7 +12,7 @@ GOAL_SCALE = 1.
 USE_TM = True
 USE_SAE = False
 USE_AX = True
-USE_UD = True
+USE_UD = False
 
 def ddpg_graph_with_goal(env, ph, params):
     '''

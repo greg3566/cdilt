@@ -83,7 +83,7 @@ class DDPGAgent():
                 self.sess = tf.Session()
 
             self.saver_expert = tf.train.Saver(var_list=self.expert_save_vars)
-            self.saver_learner = tf.train.Saver(var_list=self.learner_save_vars)
+            self.saver_learner = tf.train.Saver(var_list=self.learner_save_vars, max_to_keep=None)
 
 
             self.expert_basis = np.array([[1.0, 0.0]])
@@ -268,10 +268,7 @@ class DDPGAgent():
             if mean_reward > best_reward:
                 best_reward = mean_reward
                 self.saver_expert.save(self.sess, self.save_expert_dir+'/expert.ckpt')
-            # save model periodically
-            if ep%10000 == 0:
-                self.saver_expert.save(self.sess, self.save_expert_dir + '/' + str(ep) + '/expert.ckpt')
-
+            
 
             # Print out episode evaluation metrics
             print("Episode: {}".format(ep))
@@ -440,7 +437,10 @@ class DDPGAgent():
         best_gama_loss = np.inf
 
         while True:
-
+            if 'reacher' in self.env['learner']['name'] and step >= 30e3:
+                break
+            elif 'Ant' in self.env['learner']['name'] and step >= 500e3:
+                break
             for idx in tqdm(range(500)):
                 # grab N (s,a,r,s') tuples from replay memory
                 minibatch_l = self.replay_memory['learner'].sample_from_memory(batchsize=self.params['train']['batchsize'])
@@ -494,7 +494,7 @@ class DDPGAgent():
 
             # Evaluate episode reward of learner (TODO)
             readouts[d_]['total_reward'] = self.render_statemap({'epsilon': epsilon},
-                                                                num_rollout=5,
+                                                                num_rollout=25,
                                                                 save_video=False,
                                                                 save_dir='learner_policy')
 
@@ -508,6 +508,9 @@ class DDPGAgent():
                 best_gama_loss = epoch_gama_loss
                 best_gama_reward = readouts[d_]['total_reward']
                 self.saver_learner.save(self.sess, self.save_learner_dir+'/learner.ckpt')
+            # Save model periodically
+            if step%10000 ==0:
+                self.saver_learner.save(self.sess, self.save_learner_dir+'/learner_temp.ckpt', global_step=step)
 
             # Print out metrics
             print("Step: {}".format(step))
@@ -601,7 +604,7 @@ class DDPGAgent():
         vid_name = self.args.doc + '_{}'.format(self.load_learner_dir[-1]) \
                                                 if self.args.doc \
                                                 else self.load_learner_dir[-6:]
-        self.render_statemap({'epsilon': epsilon}, num_rollout=5, save_dir=vid_name, save_video=True)
+        self.render_statemap({'epsilon': epsilon}, num_rollout=100, save_dir=vid_name, save_video=False)
         print("Done!")
 
         # Close environments
