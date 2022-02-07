@@ -182,6 +182,11 @@ class Antv5_alignment(mujoco_env.MujocoEnv, utils.EzPickle):
         qpos = self.init_qpos + self.np_random.uniform(
             size=self.model.nq, low=-0.1, high=0.1
         )
+        ###########################################################################
+        # random spawn
+        qpos[0] = qpos[0] + self.np_random.uniform(size = 1, low = -20.0, high=20.0)
+        qpos[1] = qpos[1] + self.np_random.uniform(size = 1, low = -20.0, high=20.0)
+        ###########################################################################
         qvel = self.init_qvel + self.np_random.randn(self.model.nv) * 0.1
         self.set_state(qpos, qvel)
         return self._get_obs()
@@ -283,6 +288,11 @@ class Antv5_target(mujoco_env.MujocoEnv, utils.EzPickle):
         qpos = self.init_qpos + self.np_random.uniform(
             size=self.model.nq, low=-0.1, high=0.1
         )
+        ###########################################################################
+        # random spawn
+        qpos[0] = qpos[0] + self.np_random.uniform(size = 1, low = -20.0, high=20.0)
+        qpos[1] = qpos[1] + self.np_random.uniform(size = 1, low = -20.0, high=20.0)
+        ###########################################################################
         qvel = self.init_qvel + self.np_random.randn(self.model.nv) * 0.1
         self.set_state(qpos, qvel)
         return self._get_obs()
