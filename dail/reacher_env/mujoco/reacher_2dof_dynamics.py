@@ -23,7 +23,7 @@ class Reacher2DOFDynamicsCornerEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof.xml', 2)
         self.viewer = None
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
         a = self.dynamics_coeff * a
         vec = self.get_body_com("fingertip")-self.get_body_com("target")
@@ -113,7 +113,7 @@ class Reacher2DOFDynamicsWallEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof.xml', 2)
         self.viewer = None
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
         a = self.dynamics_coeff * a
         vec = self.get_body_com("fingertip")-self.get_body_com("target")

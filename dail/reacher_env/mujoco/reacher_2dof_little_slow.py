@@ -22,7 +22,7 @@ class Reacher2DOFLittleSlowCornerEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof_little_slow.xml', 2)
         self.viewer = None
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
         vec = self.get_body_com("fingertip")-self.get_body_com("target")
         reward_dist = - np.linalg.norm(vec)
@@ -109,7 +109,7 @@ class Reacher2DOFLittleSlowWallEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         mujoco_env.MujocoEnv.__init__(self, os.path.dirname(os.path.abspath(__file__))+'/assets/reacher_2dof_little_slow.xml', 2)
         self.viewer = None
 
-    def step(self, a):
+    def _step(self, a):
         self.steps += 1
         vec = self.get_body_com("fingertip")-self.get_body_com("target")
         reward_dist = - np.linalg.norm(vec)
